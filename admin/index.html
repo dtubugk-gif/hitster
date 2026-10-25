@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<title>קלפי שירים · ניהול</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23211C17'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%2316786B'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%23F5EEE1'/%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#F5EEE1; --paper-2:#EEE4D2; --surface:#FFFBF4; --surface-2:#F8F1E5; --ink:#211C17; --muted:#6F655A;
+  --line:#E2D5C1; --line-2:#D5C6AF; --accent:#E0563B; --accent-hover:#C9472E; --accent-ink:#fff;
+  --teal:#16786B; --teal-soft:#DCEFEA; --amber:#B7791F; --amber-soft:#FBEBCB; --danger:#B4372A; --danger-soft:#F8DCD6;
+  --shadow:0 1px 0 rgba(60,40,20,.04), 0 10px 30px -18px rgba(60,40,20,.35);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#1B1815; --paper-2:#211D19; --surface:#26211C; --surface-2:#2C2620; --ink:#F3EBDD; --muted:#B3A795;
+    --line:#3A332B; --line-2:#4A4137; --accent:#EC6A4F; --accent-hover:#F27F66; --accent-ink:#1B1815;
+    --teal:#4FB3A3; --teal-soft:#1F3833; --amber:#E2A84A; --amber-soft:#3B2F1A; --danger:#EB7A6B; --danger-soft:#3D2420;
+    --shadow:0 10px 30px -18px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif;color:var(--ink);background:var(--paper);
+  background-image:radial-gradient(110% 60% at 50% -10%, var(--paper) 30%, var(--paper-2) 100%);
+  min-height:100vh;font-size:15px;line-height:1.5}
+button,input{font:inherit;color:inherit}
+a{color:var(--teal)}
+.wrap{max-width:1120px;margin:0 auto;padding:26px 22px 60px}
+
+.top{display:flex;align-items:center;gap:16px;margin-bottom:22px;flex-wrap:wrap}
+.logo{width:50px;height:50px;border-radius:50%;flex:none;
+  background:radial-gradient(circle, var(--paper) 0 6%, transparent 6.5%), radial-gradient(circle, var(--teal) 0 30%, transparent 31%),
+  repeating-radial-gradient(circle, #1d1a17 0 1px, #2a2622 1.4px 2.4px);box-shadow:0 8px 18px -10px rgba(0,0,0,.6)}
+.top h1{font-size:25px;font-weight:800;letter-spacing:-.3px;line-height:1.15}
+.top p{color:var(--muted);font-size:14.5px}
+.top .spacer{flex:1}
+.top .links{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);margin-bottom:18px}
+.panel-head{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.step{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--paper);display:grid;place-items:center;font-weight:800;font-size:14px;flex:none}
+.panel-head h2{font-size:18px;font-weight:750}
+.panel-head .meta{color:var(--muted);font-size:14px}
+.panel-body{padding:18px 20px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line-2);background:var(--surface);
+  border-radius:12px;padding:8px 14px;min-height:40px;font-weight:600;font-size:14.5px;cursor:pointer;transition:background .15s, transform .1s;white-space:nowrap;text-decoration:none;color:var(--ink)}
+.btn:hover{background:var(--surface-2)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.icon-btn:focus-visible,input:focus-visible{outline:3px solid color-mix(in srgb, var(--teal) 55%, transparent);outline-offset:2px}
+.btn svg{width:18px;height:18px;fill:currentColor;flex:none}
+.btn.primary{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.teal{background:var(--teal);border-color:transparent;color:#fff}
+.btn.big{min-height:58px;padding:12px 26px;font-size:18px;font-weight:750;border-radius:16px}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid transparent;background:transparent;display:grid;place-items:center;cursor:pointer;color:var(--muted);flex:none}
+.icon-btn:hover{background:var(--surface-2);border-color:var(--line);color:var(--ink)}
+.icon-btn svg{width:18px;height:18px;fill:currentColor}
+.icon-btn.danger:hover{color:var(--danger);background:var(--danger-soft);border-color:transparent}
+.icon-btn.busy svg{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.link{background:none;border:none;color:var(--muted);text-decoration:underline;cursor:pointer;padding:10px 4px;font-size:13.5px}
+.link:hover{color:var(--ink)}
+
+/* connect */
+.connect{max-width:680px;margin:0 auto}
+.connect ol{padding-right:22px;line-height:1.9;margin:6px 0 16px}
+.connect li b{font-weight:700}
+.connect code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:13.5px}
+.token-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.token-row input[type=password]{flex:1;min-width:240px;direction:ltr;text-align:left;border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;background:var(--surface);min-height:46px;font-family:Consolas,monospace}
+.check{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin-top:10px;cursor:pointer}
+.note{font-size:13px;color:var(--muted);margin-top:10px}
+
+/* drop zone */
+.drop{border:2px dashed var(--line-2);border-radius:16px;padding:28px 18px;text-align:center;background:var(--surface-2);cursor:pointer;transition:border-color .15s}
+.drop:hover{border-color:var(--teal)}
+.drop strong{display:block;font-size:18px;margin:10px 0 4px}
+.drop span{color:var(--muted)}
+.drop .disc{width:54px;height:54px;margin:0 auto;border-radius:50%;background:radial-gradient(circle, var(--surface-2) 0 7%, transparent 7.5%), radial-gradient(circle, var(--accent) 0 30%, transparent 31%), repeating-radial-gradient(circle, #1d1a17 0 1px, #2a2622 1.4px 2.4px)}
+.drop .row{display:flex;gap:10px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.overlay{position:fixed;inset:0;background:color-mix(in srgb, var(--paper) 82%, transparent);backdrop-filter:blur(3px);display:none;place-items:center;z-index:50;pointer-events:none}
+.overlay div{border:3px dashed var(--teal);border-radius:24px;padding:44px 60px;font-size:24px;font-weight:800;background:var(--surface)}
+body.dragging .overlay{display:grid}
+
+.progress{margin-top:14px}
+.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;width:0;background:var(--teal);border-radius:99px;transition:width .2s}
+
+/* lists */
+.list-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0 10px}
+.summary{color:var(--muted);font-size:14px}
+.summary b{color:var(--ink)}
+.summary .warn{color:var(--amber);font-weight:600}
+.songs{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.song,.songs-head{display:grid;grid-template-columns:62px 40px minmax(150px,2fr) minmax(120px,1.4fr) 92px 118px;gap:10px;align-items:center;padding:8px 12px}
+.songs-head{background:var(--surface-2);font-size:12.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
+.song{border-bottom:1px solid var(--line)}
+.song:last-child{border-bottom:none}
+.song.playing{background:var(--teal-soft)}
+.badge{height:34px;min-width:44px;border-radius:10px;display:grid;place-items:center;font-weight:800;font-size:15px;background:var(--ink);color:var(--paper);padding:0 6px}
+.badge.new{background:transparent;color:var(--accent);border:1.5px dashed var(--accent);font-size:12.5px;font-weight:700}
+.badge.work{background:transparent;color:var(--muted);border:1.5px dashed var(--line-2);font-size:12px;font-weight:700}
+.play{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;cursor:pointer}
+.play svg{width:16px;height:16px;fill:var(--ink)}
+.song.playing .play{background:var(--teal);border-color:var(--teal)}
+.song.playing .play svg{fill:#fff}
+.field{min-width:0}
+.field input{width:100%;border:1px solid transparent;background:transparent;border-radius:9px;padding:6px 9px;min-height:36px}
+.field input:hover{border-color:var(--line)}
+.field input:focus{border-color:var(--teal);background:var(--surface);outline:none}
+.field .t{font-weight:650}
+.orig{font-size:12px;color:var(--muted);padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.year input{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;border-color:var(--line)}
+.year.missing input{border-color:color-mix(in srgb, var(--amber) 65%, transparent);background:var(--amber-soft)}
+.year.missing input::placeholder{color:var(--amber);font-weight:600}
+.year .src{display:block;text-align:center;font-size:11px;color:var(--teal);font-weight:600;min-height:15px;line-height:15px}
+.acts{display:flex;gap:2px;justify-content:flex-end}
+.empty-list{padding:24px;text-align:center;color:var(--muted)}
+.pending-box{margin-top:16px}
+.pending-box h3{font-size:15.5px;margin-bottom:8px}
+.go{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px}
+.go p{color:var(--muted);font-size:14px}
+
+.banner{border-radius:14px;padding:12px 16px;margin-bottom:14px;display:flex;gap:10px;align-items:flex-start;font-size:14.5px}
+.banner svg{width:20px;height:20px;flex:none;margin-top:1px;fill:currentColor}
+.banner.warn{background:var(--amber-soft);color:color-mix(in srgb, var(--amber) 70%, var(--ink))}
+.banner.err{background:var(--danger-soft);color:var(--danger)}
+.banner.ok{background:var(--teal-soft);color:color-mix(in srgb, var(--teal) 75%, var(--ink))}
+
+.print-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.saved{font-size:13px;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.saved.busy::before{content:"";width:12px;height:12px;border-radius:50%;border:2px solid var(--line-2);border-top-color:var(--teal);animation:spin .8s linear infinite}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);padding:11px 18px;border-radius:12px;font-weight:600;opacity:0;transition:opacity .2s, transform .2s;z-index:60;max-width:min(92vw,560px);text-align:center;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--danger);color:#fff}
+.spinner{width:22px;height:22px;border-radius:50%;border:3px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite}
+[hidden]{display:none !important}
+
+@media (max-width: 820px){
+  .wrap{padding:16px 12px 50px}
+  .songs-head{display:none}
+  .song{grid-template-columns:46px 92px 1fr;grid-template-areas:"num title title" "play artist artist" ". year acts";row-gap:4px;padding:10px}
+  .song .badge{grid-area:num}.song .play{grid-area:play;justify-self:center}.song .f-title{grid-area:title}.song .f-artist{grid-area:artist}.song .year{grid-area:year}.song .acts{grid-area:acts;align-self:start}
+}
+</style>
+</head>
+<body>
+<div class="overlay"><div>שחררו כאן את השירים</div></div>
+<div class="wrap">
+  <header class="top">
+    <div class="logo" aria-hidden="true"></div>
+    <div>
+      <h1>קלפי שירים · ניהול</h1>
+      <p>מוסיפים שירים, מתקנים שמות ושנים ומדפיסים קלפים. הכול עולה ישר לאתר המשחק.</p>
+    </div>
+    <span class="spacer"></span>
+    <div class="links">
+      <span class="saved" id="saved" hidden></span>
+      <a class="btn" id="siteLink" href="../" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 3h7v7h-2V6.4l-9.3 9.3-1.4-1.4L17.6 5H14zM5 5h6v2H7v10h10v-4h2v6H5z"/></svg>לאתר המשחק</a>
+      <button class="link" type="button" id="logout" hidden>התנתקות</button>
+    </div>
+  </header>
+
+  <div id="banners"></div>
+
+  <!-- connect -->
+  <section class="panel connect" id="connectPanel" hidden>
+    <div class="panel-head"><div class="step">🔑</div><h2>חיבור ל-GitHub (פעם אחת)</h2></div>
+    <div class="panel-body">
+      <p>כדי שהדף הזה יוכל להעלות שירים לאתר, הוא צריך מפתח גישה מהחשבון שלכם ב-GitHub. המפתח פותח רק את שני המאגרים של המשחק.</p>
+      <ol>
+        <li>פתחו את <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">דף יצירת המפתח ב-GitHub</a> (צריך להיות מחוברים לחשבון <b id="ownerName"></b>).</li>
+        <li><b>Token name:</b> כתבו <code>קלפי שירים</code>. <b>Expiration:</b> בחרו כמה זמן המפתח יעבוד (למשל שנה).</li>
+        <li><b>Repository access:</b> בחרו <b>Only select repositories</b> וסמנו את <code id="repo1"></code> ואת <code id="repo2"></code>.</li>
+        <li><b>Permissions → Repository permissions → Contents:</b> בחרו <b>Read and write</b>.</li>
+        <li>לחצו <b>Generate token</b>, העתיקו את המפתח (מתחיל ב-<code>github_pat_</code>) והדביקו אותו כאן:</li>
+      </ol>
+      <form class="token-row" id="tokenForm" autocomplete="off">
+        <input type="password" id="tokenInput" placeholder="github_pat_..." aria-label="מפתח GitHub" spellcheck="false" autocomplete="off">
+        <button class="btn primary" type="submit" id="tokenBtn">התחברות</button>
+      </form>
+      <label class="check"><input type="checkbox" id="remember" checked> לזכור את המפתח במכשיר הזה</label>
+      <p class="note">המפתח נשמר רק בדפדפן הזה ונשלח רק ל-GitHub. אל תשתפו אותו עם אף אחד. אפשר לבטל אותו בכל רגע בהגדרות של GitHub.</p>
+    </div>
+  </section>
+
+  <div id="app" hidden>
+    <!-- add -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="step">1</div>
+        <h2>הוספת שירים</h2>
+        <div class="meta">כאן רואים את השמות. באתר עצמו יש רק מספרים.</div>
+      </div>
+      <div class="panel-body">
+        <div class="drop" id="drop" role="button" tabindex="0" aria-label="הוספת שירים">
+          <div class="disc" aria-hidden="true"></div>
+          <strong>גררו לכאן קבצי שירים או תיקייה שלמה</strong>
+          <span>MP3, M4A, WAV, FLAC ועוד. כל שיר מומר ל-MP3 נקי, בלי שם ובלי תמונה.</span>
+          <div class="row">
+            <button class="btn" type="button" id="pickFiles"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM12 18a3 3 0 1 1 1-5.83V11h3v2h-2v2a3 3 0 0 1-2 3z"/></svg>בחירת קבצים</button>
+            <button class="btn" type="button" id="pickFolder"><svg viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8z"/></svg>בחירת תיקייה</button>
+          </div>
+        </div>
+        <input type="file" id="fileInput" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.opus,.aac" hidden>
+        <input type="file" id="folderInput" webkitdirectory multiple hidden>
+        <div class="progress" id="prepProgress" hidden><span id="prepText"></span><div class="bar"><i id="prepBar"></i></div></div>
+
+        <div class="pending-box" id="pendingBox" hidden>
+          <h3>מוכנים להעלאה</h3>
+          <div class="songs"><div id="pendingRows"></div></div>
+          <div class="go">
+            <button class="btn primary big" type="button" id="uploadBtn">
+              <svg viewBox="0 0 24 24"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zM5 18h14v2H5z"/></svg>
+              <span id="uploadLabel">העלאה לאתר</span>
+            </button>
+            <p>כל שיר יקבל מספר (הבא בתור), יעלה לאתר כקובץ ממוספר, ויקבל QR.</p>
+          </div>
+          <div class="progress" id="upProgress" hidden><span id="upText"></span><div class="bar"><i id="upBar"></i></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- library -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="step">2</div>
+        <h2>השירים במשחק</h2>
+        <div class="meta" id="libMeta"></div>
+      </div>
+      <div class="panel-body">
+        <div class="list-tools">
+          <div class="summary" id="summary"></div>
+          <span style="flex:1"></span>
+          <button class="btn" type="button" id="findAll"><svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.42 1.4-5.39-5.38A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><span>מצא שנים חסרות באינטרנט</span></button>
+        </div>
+        <div class="songs">
+          <div class="songs-head"><div>מספר</div><div></div><div>שם השיר</div><div>זמר / להקה</div><div style="text-align:center">שנה</div><div></div></div>
+          <div id="rows"></div>
+        </div>
+        <p class="note">שינויים בשמות ובשנים נשמרים לבד. ⇄ מחליף בין שם השיר לזמר, 🔍 מחפש את שנת היציאה (כדאי לבדוק את ההצעה).</p>
+      </div>
+    </section>
+
+    <!-- print -->
+    <section class="panel">
+      <div class="panel-head">
+        <div class="step">3</div>
+        <h2>הדפסת קלפים</h2>
+        <div class="meta">QR מקדימה, שנה וזמר מאחורה. דו־צדדי, היפוך לאורך הצד הארוך, בגודל 100%.</div>
+      </div>
+      <div class="panel-body print-row">
+        <button class="btn primary" type="button" id="printNew"><svg viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 8h14a2 2 0 0 1 2 2v6h-4v4H7v-4H3v-6a2 2 0 0 1 2-2zm4 8v2h6v-4H9z"/></svg><span id="printNewLabel">הדפסת הקלפים החדשים</span></button>
+        <button class="btn" type="button" id="printAll"><svg viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 8h14a2 2 0 0 1 2 2v6h-4v4H7v-4H3v-6a2 2 0 0 1 2-2zm4 8v2h6v-4H9z"/></svg>הדפסת כל הקלפים</button>
+        <span class="note" id="printNote" style="margin:0"></span>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="qrcode.js"></script>
+<script>
+(() => {
+  // ------------------------------------------------------------------ settings
+  const CFG = {
+    owner: "dtubugk-gif",
+    siteRepo: "hitster",
+    dataRepo: "hitster-data",
+    siteUrl: "https://dtubugk-gif.github.io/hitster/",
+    api: "https://api.github.com",
+  };
+  // test hooks, honoured only on this computer so a crafted link can never send the key elsewhere
+  if (["localhost", "127.0.0.1"].includes(location.hostname)) {
+    const q = new URLSearchParams(location.search);
+    if (q.get("api")) CFG.api = q.get("api");
+    if (q.get("site")) CFG.siteUrl = q.get("site");
+  }
+  const TOKEN_KEY = "kalfei-shirim.token";
+
+  const $ = id => document.getElementById(id);
+  const ICONS = {
+    play: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>',
+    pause: '<svg viewBox="0 0 24 24"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>',
+    swap: '<svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3 1.4-1.4L21.8 8l-5.4 5.4L15 12l3-3H7zm10 10H6l3 3-1.4 1.4L2.2 16l5.4-5.4L9 12l-3 3h11z"/></svg>',
+    find: '<svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.42 1.4-5.39-5.38A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>',
+    spin: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10h-2.5A7.5 7.5 0 1 1 12 4.5z"/></svg>',
+    del: '<svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z"/></svg>',
+    warn: '<svg viewBox="0 0 24 24"><path d="M12 2 1 21h22zm-1 7h2v6h-2zm0 8h2v2h-2z"/></svg>',
+    ok: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.5 14.5-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/></svg>',
+  };
+  const AUDIO_EXT = /\.(mp3|m4a|aac|wav|flac|ogg|oga|opus|webm|mp4|aiff?)$/i;
+
+  let token = "", lib = null, libSha = null, pending = [], busy = false;
+
+  // ------------------------------------------------------------------ helpers
+  function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
+  let toastTimer;
+  function toast(msg, err) {
+    const t = $("toast"); t.textContent = msg; t.className = "toast on" + (err ? " err" : "");
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = "toast" + (err ? " err" : ""), err ? 6000 : 2800);
+  }
+  function setSaved(text, isBusy) { const s = $("saved"); s.hidden = !text; s.textContent = text || ""; s.classList.toggle("busy", !!isBusy); }
+  function fmtDur(s) { if (!s) return ""; const m = Math.floor(s / 60); return m + ":" + String(Math.round(s % 60)).padStart(2, "0"); }
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  function b64ToText(b64) {
+    const bin = atob(b64.replace(/\s/g, ""));
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function textToB64(text) {
+    const bytes = new TextEncoder().encode(text);
+    let bin = "";
+    for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+    return btoa(bin);
+  }
+  function blobToB64(blob) {
+    return new Promise((res, rej) => {
+      const r = new FileReader();
+      r.onload = () => res(String(r.result).split(",", 2)[1]);
+      r.onerror = () => rej(r.error);
+      r.readAsDataURL(blob);
+    });
+  }
+  async function sha1(buf) {
+    const h = await crypto.subtle.digest("SHA-1", buf);
+    return [...new Uint8Array(h)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  // ------------------------------------------------------------------ GitHub
+  async function gh(path, opts = {}) {
+    const headers = { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+    if (opts.body) headers["Content-Type"] = "application/json";
+    let res;
+    try {
+      res = await fetch(CFG.api + path, { ...opts, headers, cache: "no-store" });
+    } catch (e) {
+      throw Object.assign(new Error("אין חיבור ל-GitHub. בדקו את האינטרנט ונסו שוב."), { status: 0 });
+    }
+    if (res.status === 204) return null;
+    let data = null; try { data = await res.json(); } catch (e) {}
+    if (!res.ok) {
+      let msg = (data && data.message) || ("שגיאה " + res.status);
+      if (res.status === 401) msg = "המפתח לא תקין או שפג תוקפו. התחברו מחדש עם מפתח חדש.";
+      if (res.status === 403 && /rate limit/i.test(msg)) msg = "GitHub ביקש להאט. נסו שוב בעוד כמה דקות.";
+      throw Object.assign(new Error(msg), { status: res.status, data });
+    }
+    return data;
+  }
+  const repoPath = repo => `/repos/${CFG.owner}/${repo}`;
+
+  async function loadLibrary() {
+    const f = await gh(repoPath(CFG.dataRepo) + "/contents/library.json");
+    libSha = f.sha;
+    const data = JSON.parse(b64ToText(f.content));
+    data.songs = data.songs || [];
+    data.next_number = data.next_number || 1;
+    data.printed_upto = data.printed_upto || 0;
+    return data;
+  }
+
+  // read-modify-write with retry, so two open tabs (or phone + computer) never overwrite each other
+  async function saveLibrary(mutate, message) {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const fresh = await loadLibrary();
+      mutate(fresh);
+      try {
+        const r = await gh(repoPath(CFG.dataRepo) + "/contents/library.json", {
+          method: "PUT",
+          body: JSON.stringify({ message: message || "עדכון רשימת השירים", sha: libSha, content: textToB64(JSON.stringify(fresh, null, 1) + "\n") }),
+        });
+        libSha = r.content.sha;
+        // keep edits that are still waiting for their own save, so a redraw never shows old values
+        for (const [num, f] of Object.entries(edits)) {
+          const s = fresh.songs.find(x => x.number === +num);
+          if (s) Object.assign(s, f);
+        }
+        lib = fresh;
+        return fresh;
+      } catch (e) {
+        if (e.status !== 409 && e.status !== 422) throw e;
+        await sleep(400 + attempt * 600);
+      }
+    }
+    throw new Error("לא הצלחתי לשמור (הרשימה השתנתה במקום אחר). רעננו את הדף ונסו שוב.");
+  }
+
+  // one commit to the site repo: add/replace files ({path, sha}) and delete paths ({path, sha: null})
+  async function commitSite(entries, message) {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const ref = await gh(repoPath(CFG.siteRepo) + "/git/ref/heads/main");
+      const head = await gh(repoPath(CFG.siteRepo) + "/git/commits/" + ref.object.sha);
+      const tree = await gh(repoPath(CFG.siteRepo) + "/git/trees", {
+        method: "POST",
+        body: JSON.stringify({ base_tree: head.tree.sha, tree: entries.map(e => ({ path: e.path, mode: "100644", type: "blob", sha: e.sha })) }),
+      });
+      const commit = await gh(repoPath(CFG.siteRepo) + "/git/commits", {
+        method: "POST", body: JSON.stringify({ message, tree: tree.sha, parents: [ref.object.sha] }),
+      });
+      try {
+        await gh(repoPath(CFG.siteRepo) + "/git/refs/heads/main", { method: "PATCH", body: JSON.stringify({ sha: commit.sha }) });
+        return commit.sha;
+      } catch (e) {
+        if (e.status !== 422 && e.status !== 409) throw e; // someone pushed in between: rebuild on the new head
+      }
+    }
+    throw new Error("לא הצלחתי לעדכן את האתר. נסו שוב.");
+  }
+
+  // ------------------------------------------------------------------ names
+  const HEB = /[֐-׿]/;
+  function cleanStem(stem) {
+    let s = stem.replace(/_/g, " ")
+      .replace(/\(\s*\d+\s*\)/g, " ")
+      .replace(/\[[^\]]*\]/g, " ")
+      .replace(/\((?:[^)]*(?:official|video|audio|lyric|clip|hd|hq|קליפ|מילים|רשמי)[^)]*)\)/gi, " ")
+      .replace(/\bofficial\s+(?:music\s+)?(?:video|audio|clip)\b/gi, " ")
+      .replace(/\b(?:lyrics?|lyric\s+video|music\s+video|video\s*clip|hd|hq|4k|audio)\b/gi, " ")
+      .replace(/(^|[^֐-׿])(הקליפ\s+הרשמי|קליפ\s+רשמי|קליפ|מילים|גרסה\s+רשמית)(?=$|[^֐-׿])/g, "$1 ");
+    if (HEB.test(s)) { // "חנן בן ארי - אמא Hanan Ben Ari - Mother": drop the trailing Latin translation
+      const m = s.search(/[A-Za-z]/);
+      if (m > 0 && HEB.test(s.slice(0, m)) && !HEB.test(s.slice(m))) s = s.slice(0, m);
+    }
+    s = s.replace(/\s+/g, " ").replace(/^[\s\-–—|.,]+|[\s\-–—|.,]+$/g, "");
+    return s || stem;
+  }
+  function splitSides(name) {
+    const stem = name.replace(/\.[^.]+$/, "");
+    const parts = cleanStem(stem).split(/\s+[-–—|]\s*|\s*[-–—|]\s+/);
+    if (parts.length >= 2 && parts[0].trim() && parts.slice(1).join(" ").trim())
+      return [parts[0].trim(), parts.slice(1).join(" - ").trim()];
+    return [cleanStem(stem), ""];
+  }
+  // filenames are "Artist - Title" or "Title - Artist": the side that repeats (or is a known artist) is the artist
+  function guessNames() {
+    const counts = {};
+    const bump = (k, n) => { if (k) counts[k] = (counts[k] || 0) + n; };
+    for (const s of (lib ? lib.songs : [])) bump(s.artist, 3);
+    for (const p of pending) { const [a, b] = splitSides(p.name); bump(a, 1); if (b && b !== a) bump(b, 1); }
+    for (const p of pending) {
+      if (p.edited) continue;
+      const [a, b] = splitSides(p.name);
+      if (!b) { p.title = a; p.artist = ""; }
+      else if ((counts[b] || 0) > (counts[a] || 0)) { p.artist = b; p.title = a; }
+      else { p.artist = a; p.title = b; }
+    }
+  }
+
+  // ------------------------------------------------------------------ year lookup
+  let mbLast = 0;
+  async function musicbrainz(q) {
+    const wait = 1500 - (Date.now() - mbLast);
+    if (wait > 0) await sleep(wait);
+    for (let attempt = 0; attempt < 4; attempt++) {
+      mbLast = Date.now();
+      const res = await fetch("https://musicbrainz.org/ws/2/recording?fmt=json&limit=60&query=" + encodeURIComponent(q));
+      if (res.status === 503) { await sleep(2000 * (attempt + 1)); continue; }
+      if (!res.ok) throw new Error("החיפוש נכשל (" + res.status + ")");
+      return res.json();
+    }
+    throw new Error("שירות החיפוש עמוס. נסו שוב בעוד דקה.");
+  }
+  const lucene = s => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  async function lookupYear(title, artist) {
+    const data = await musicbrainz(`recording:"${lucene(title)}" AND artist:"${lucene(artist)}"`);
+    let best = null, count = 0;
+    for (const r of data.recordings || []) {
+      if ((r.score || 0) < 85) continue;
+      const m = /^(\d{4})/.exec(r["first-release-date"] || "");
+      if (!m) continue;
+      count++;
+      const y = +m[1];
+      if (!best || y < best.year) best = { year: y, title: r.title, artist: (r["artist-credit"] || []).map(a => a.name).join(" ") };
+    }
+    return best && { ...best, year: String(best.year), matches: count };
+  }
+  async function lookupSong(title, artist) {
+    if (!title || !artist) return { needArtist: true };
+    const hit = await lookupYear(title, artist);
+    if (hit) return hit;
+    const swapped = await lookupYear(artist, title);
+    return swapped ? { ...swapped, swapped: true } : null;
+  }
+
+  // ------------------------------------------------------------------ connect
+  async function connect(t, remember) {
+    token = t;
+    const [site, data] = await Promise.all([gh(repoPath(CFG.siteRepo)), gh(repoPath(CFG.dataRepo))]).catch(e => {
+      if (e.status === 404) throw new Error(`למפתח אין גישה למאגרים ${CFG.siteRepo} ו-${CFG.dataRepo}. בדקו שסימנתם את שניהם ב-Repository access.`);
+      throw e;
+    });
+    if (site.permissions && !site.permissions.push || data.permissions && !data.permissions.push)
+      throw new Error("למפתח אין הרשאת כתיבה. ב-Permissions בחרו Contents: Read and write.");
+    lib = await loadLibrary();
+    try {
+      (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
+      (remember ? sessionStorage : localStorage).removeItem(TOKEN_KEY);
+    } catch (e) {}
+  }
+  function storedToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
+  }
+  function forgetToken() {
+    try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    token = ""; lib = null;
+  }
+  function showConnect(msg) {
+    $("app").hidden = true; $("connectPanel").hidden = false; $("logout").hidden = true;
+    $("banners").innerHTML = msg ? `<div class="banner err">${ICONS.warn}<div>${esc(msg)}</div></div>` : "";
+    $("tokenInput").focus();
+    $("tokenInput").select(); // a new paste replaces the key that did not work
+  }
+  function showApp() {
+    $("connectPanel").hidden = true; $("app").hidden = false; $("logout").hidden = false;
+    $("banners").innerHTML = "";
+    renderAll();
+  }
+  $("ownerName").textContent = CFG.owner;
+  $("repo1").textContent = CFG.siteRepo;
+  $("repo2").textContent = CFG.dataRepo;
+  $("siteLink").href = CFG.siteUrl;
+
+  $("tokenForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const t = $("tokenInput").value.trim();
+    if (!t) return;
+    const btn = $("tokenBtn"); btn.disabled = true; btn.textContent = "מתחבר...";
+    try { await connect(t, $("remember").checked); $("tokenInput").value = ""; showApp(); toast("מחובר! אפשר להוסיף שירים"); }
+    catch (err) { forgetToken(); showConnect(err.message); }
+    finally { btn.disabled = false; btn.textContent = "התחברות"; }
+  });
+  $("logout").addEventListener("click", () => {
+    if (!confirm("להתנתק? תצטרכו להדביק את המפתח שוב כדי לנהל את השירים במכשיר הזה.")) return;
+    forgetToken(); stopPreview(); pending = []; showConnect();
+  });
+
+  // ------------------------------------------------------------------ render
+  function renderAll() { renderPending(); renderLibrary(); renderPrint(); }
+
+  function rowHtml(s, isPending) {
+    const missing = !(s.year || "").trim();
+    const id = isPending ? "p" + s.id : "n" + s.number;
+    const badge = isPending
+      ? (s.state === "ready" ? `<div class="badge new" title="יקבל מספר בהעלאה">חדש</div>` : `<div class="badge work">${s.state === "error" ? "שגיאה" : Math.round((s.progress || 0) * 100) + "%"}</div>`)
+      : `<div class="badge" title="songs/${s.number}.mp3">${s.number}</div>`;
+    const orig = isPending ? `${esc(s.name)}${s.duration ? " · " + fmtDur(s.duration) : ""}${s.state === "error" ? " · " + esc(s.error) : ""}`
+                           : `${esc(s.original_name || "")}${s.duration ? " · " + fmtDur(s.duration) : ""}`;
+    return `<div class="song${previewId === id ? " playing" : ""}" data-id="${id}">
+      ${badge}
+      <button class="play" type="button" data-act="play" aria-label="השמעה"${isPending && s.state !== "ready" ? " disabled" : ""}>${previewId === id ? ICONS.pause : ICONS.play}</button>
+      <div class="field f-title"><input class="t" data-f="title" value="${esc(s.title)}" placeholder="שם השיר" aria-label="שם השיר"><div class="orig"><bdi>${orig}</bdi></div></div>
+      <div class="field f-artist"><input data-f="artist" value="${esc(s.artist)}" placeholder="זמר / להקה" aria-label="זמר"></div>
+      <div class="field year${missing ? " missing" : ""}"><input data-f="year" value="${esc(s.year)}" placeholder="שנה?" inputmode="numeric" maxlength="4" aria-label="שנה"><span class="src">${s.year_source === "auto" ? "הצעה מהאינטרנט" : ""}</span></div>
+      <div class="acts">
+        <button class="icon-btn" type="button" data-act="swap" title="החלפה בין שם השיר לזמר" aria-label="החלפה">${ICONS.swap}</button>
+        <button class="icon-btn" type="button" data-act="find" title="חיפוש שנה באינטרנט" aria-label="חיפוש שנה">${ICONS.find}</button>
+        <button class="icon-btn danger" type="button" data-act="del" title="${isPending ? "הסרה מהרשימה" : "מחיקה מהמשחק"}" aria-label="הסרה">${ICONS.del}</button>
+      </div>
+    </div>`;
+  }
+
+  function renderPending() {
+    $("pendingBox").hidden = pending.length === 0;
+    $("pendingRows").innerHTML = pending.map(p => rowHtml(p, true)).join("");
+    const ready = pending.filter(p => p.state === "ready").length;
+    const working = pending.some(p => p.state === "queued" || p.state === "working");
+    $("uploadLabel").textContent = working ? "מכין שירים..." : `העלאה לאתר (${ready} שירים)`;
+    $("uploadBtn").disabled = busy || working || ready === 0;
+  }
+
+  function renderLibrary() {
+    const songs = [...lib.songs].sort((a, b) => a.number - b.number);
+    $("rows").innerHTML = songs.map(s => rowHtml(s, false)).join("") || '<div class="empty-list">עוד אין שירים במשחק. הוסיפו שירים למעלה.</div>';
+    const missing = songs.filter(s => !(s.year || "").trim()).length;
+    $("summary").innerHTML = `<b>${songs.length}</b> שירים` + (songs.length ? (missing ? ` · <span class="warn">${missing} בלי שנה</span>` : " · לכולם יש שנה ✓") : "");
+    $("findAll").hidden = missing === 0;
+    $("libMeta").innerHTML = `הקלפים מובילים אל <span dir="ltr">${esc(CFG.siteUrl)}</span>`;
+  }
+
+  function renderPrint() {
+    const newOnes = lib.songs.filter(s => s.number > lib.printed_upto).length;
+    $("printNewLabel").textContent = newOnes ? `הדפסת הקלפים החדשים (${newOnes})` : "אין קלפים חדשים להדפסה";
+    $("printNew").disabled = newOnes === 0;
+    $("printAll").disabled = lib.songs.length === 0;
+    $("printNote").textContent = lib.printed_upto ? `הודפסו כבר קלפים עד מספר ${lib.printed_upto}.` : "";
+  }
+
+  // ------------------------------------------------------------------ editing
+  const edits = {}; let editTimer = null;
+  function queueEdit(number, field, value, extra) {
+    const s = lib.songs.find(x => x.number === number); if (!s) return;
+    s[field] = value; if (extra) Object.assign(s, extra);
+    edits[number] = { ...(edits[number] || {}), [field]: value, ...(extra || {}) };
+    setSaved("שומר...", true);
+    clearTimeout(editTimer);
+    editTimer = setTimeout(flushEdits, 900);
+  }
+  async function flushEdits() {
+    const batch = { ...edits };
+    for (const k of Object.keys(batch)) delete edits[k];
+    if (!Object.keys(batch).length) return;
+    try {
+      await saveLibrary(fresh => {
+        for (const [num, f] of Object.entries(batch)) {
+          const s = fresh.songs.find(x => x.number === +num);
+          if (s) Object.assign(s, f);
+        }
+      }, "עדכון שמות ושנים");
+      setSaved("נשמר ✓");
+      renderPrint();
+    } catch (e) {
+      Object.assign(edits, batch);
+      setSaved("השמירה נכשלה");
+      toast(e.message, true);
+    }
+  }
+  window.addEventListener("beforeunload", e => {
+    if (Object.keys(edits).length || busy) { e.preventDefault(); e.returnValue = ""; }
+  });
+
+  function findItem(id) {
+    return id[0] === "p" ? { pending: true, item: pending.find(p => "p" + p.id === id) }
+                         : { pending: false, item: lib.songs.find(s => "n" + s.number === id) };
+  }
+  function setField(id, field, value, extra) {
+    const { pending: isP, item } = findItem(id); if (!item) return;
+    if (isP) { item[field] = value; if (field !== "year") item.edited = true; if (extra) Object.assign(item, extra); }
+    else queueEdit(item.number, field, value, extra);
+  }
+
+  for (const box of ["rows", "pendingRows"]) {
+    $(box).addEventListener("input", e => {
+      const inp = e.target.closest("input[data-f]"); if (!inp) return;
+      const row = inp.closest(".song"), f = inp.dataset.f;
+      if (f === "year") {
+        inp.value = inp.value.replace(/\D/g, "").slice(0, 4);
+        row.querySelector(".year").classList.toggle("missing", !inp.value);
+        row.querySelector(".year .src").textContent = "";
+      }
+      setField(row.dataset.id, f, inp.value.trim(), f === "year" ? { year_source: "manual" } : null);
+    });
+    $(box).addEventListener("click", e => {
+      const btn = e.target.closest("button[data-act]"); if (!btn) return;
+      const row = btn.closest(".song"), id = row.dataset.id, act = btn.dataset.act;
+      const { pending: isP, item } = findItem(id); if (!item) return;
+      if (act === "play") return togglePreview(id, isP ? item.url : CFG.siteUrl + "songs/" + item.number + ".mp3");
+      if (act === "swap") {
+        const t = row.querySelector('[data-f=title]'), a = row.querySelector('[data-f=artist]');
+        [t.value, a.value] = [a.value, t.value];
+        setField(id, "title", t.value.trim()); setField(id, "artist", a.value.trim());
+        return;
+      }
+      if (act === "find") return findYear(id, true).catch(err => toast(err.message, true));
+      if (act === "del") return isP ? removePending(item) : deleteSong(item);
+    });
+  }
+
+  async function findYear(id, loud) {
+    let row = document.querySelector(`.song[data-id="${id}"]`); if (!row) return false;
+    const { item } = findItem(id); if (!item) return false;
+    let btn = row.querySelector('[data-act=find]');
+    const title = row.querySelector('[data-f=title]').value.trim(), artist = row.querySelector('[data-f=artist]').value.trim();
+    btn.classList.add("busy"); btn.innerHTML = ICONS.spin;
+    try {
+      const r = await lookupSong(title, artist);
+      // the list may have been redrawn while waiting for the answer
+      row = document.querySelector(`.song[data-id="${id}"]`) || row;
+      btn = row.querySelector('[data-act=find]');
+      if (r && r.needArtist) { if (loud) toast(`כדי לחפש שנה ל"${title}" כתבו קודם את שם הזמר`, true); return false; }
+      if (!r) { if (loud) toast(`לא נמצאה שנה ל"${title}". אפשר לכתוב אותה ידנית.`, true); return false; }
+      if (r.swapped) {
+        const t = row.querySelector('[data-f=title]'), a = row.querySelector('[data-f=artist]');
+        [t.value, a.value] = [a.value, t.value];
+        setField(id, "title", t.value.trim()); setField(id, "artist", a.value.trim());
+      }
+      row.querySelector('[data-f=year]').value = r.year;
+      row.querySelector(".year").classList.remove("missing");
+      const src = row.querySelector(".year .src"); src.textContent = "הצעה מהאינטרנט"; src.title = `נמצא: ${r.title} · ${r.artist}`;
+      setField(id, "year", r.year, { year_source: "auto" });
+      if (loud) toast(`נמצאה שנה ${r.year}${r.swapped ? " (והוחלפו שם השיר והזמר)" : ""}. כדאי לוודא שזו השנה הנכונה.`);
+      return true;
+    } finally {
+      btn.classList.remove("busy"); btn.innerHTML = ICONS.find;
+    }
+  }
+  $("findAll").addEventListener("click", async () => {
+    const btn = $("findAll"), label = btn.querySelector("span");
+    const missing = lib.songs.filter(s => !(s.year || "").trim());
+    const todo = missing.filter(s => (s.artist || "").trim());
+    if (!todo.length) return toast("לשירים בלי שנה אין עדיין שם זמר. כתבו אותו ואז אפשר לחפש.", true);
+    btn.disabled = true; let found = 0, failed = 0;
+    try {
+      for (let i = 0; i < todo.length; i++) {
+        label.textContent = `מחפש ${i + 1} מתוך ${todo.length}...`;
+        try { if (await findYear("n" + todo[i].number, false)) found++; failed = 0; }
+        catch (err) { if (++failed >= 3) throw err; }
+      }
+      toast(`נמצאו שנים ל־${found} מתוך ${todo.length} שירים. כדאי לעבור עליהן ולוודא.`);
+    } catch (err) { toast(err.message, true); }
+    finally { btn.disabled = false; label.textContent = "מצא שנים חסרות באינטרנט"; renderLibrary(); }
+  });
+
+  async function deleteSong(s) {
+    if (busy) return;
+    if (!confirm(`למחוק את "${s.title || ("שיר " + s.number)}" מהמשחק?\nקלף מספר ${s.number} יפסיק לעבוד.`)) return;
+    busy = true; setSaved("מוחק...", true);
+    try {
+      if (previewId === "n" + s.number) stopPreview();
+      await commitSite([{ path: `songs/${s.number}.mp3`, sha: null }], `מחיקת שיר ${s.number}`).catch(e => {
+        if (e.status !== 422) throw e; // the file was never uploaded: nothing to delete
+      });
+      await saveLibrary(fresh => { fresh.songs = fresh.songs.filter(x => x.number !== s.number); }, `מחיקת שיר ${s.number}`);
+      setSaved("נשמר ✓"); renderAll(); toast(`שיר ${s.number} נמחק`);
+    } catch (e) { setSaved(""); toast(e.message, true); }
+    finally { busy = false; renderPending(); }
+  }
+
+  // ------------------------------------------------------------------ preview
+  const preview = new Audio(); let previewId = null;
+  function stopPreview() {
+    preview.pause(); const old = previewId; previewId = null;
+    const row = old && document.querySelector(`.song[data-id="${old}"]`);
+    if (row) { row.classList.remove("playing"); row.querySelector(".play").innerHTML = ICONS.play; }
+  }
+  function togglePreview(id, url) {
+    if (previewId === id) return stopPreview();
+    stopPreview();
+    previewId = id; preview.src = url;
+    preview.play().catch(() => { toast(id[0] === "n" ? "השיר עוד לא זמין באתר (אחרי העלאה זה לוקח כדקה)" : "לא הצלחתי להשמיע את הקובץ", true); stopPreview(); });
+    const row = document.querySelector(`.song[data-id="${id}"]`);
+    if (row) { row.classList.add("playing"); row.querySelector(".play").innerHTML = ICONS.pause; }
+  }
+  preview.addEventListener("ended", stopPreview);
+
+  // ------------------------------------------------------------------ add songs
+  let nextPendingId = 1, worker = null, preparing = false;
+  function encodeMp3(left, right, sampleRate, onProgress) {
+    if (!worker) worker = new Worker("encoder.js");
+    return new Promise((res, rej) => {
+      worker.onmessage = e => { if (e.data.done) res(e.data.done); else onProgress(e.data.progress); };
+      worker.onerror = e => { worker.terminate(); worker = null; rej(new Error("קידוד נכשל")); };
+      worker.postMessage({ left, right, sampleRate, kbps: 160 }, [left.buffer, right.buffer]);
+    });
+  }
+  // A real MP3 only needs its tags cut off (ID3v2 at the start, APE/ID3v1 at the end): instant and lossless.
+  // Returns null when the file is not a plain MP3 stream (e.g. an MP4 renamed to .mp3) so it gets re-encoded.
+  function stripMp3(buf) {
+    const b = new Uint8Array(buf);
+    let start = 0;
+    while (b.length - start > 10 && b[start] === 0x49 && b[start + 1] === 0x44 && b[start + 2] === 0x33) { // "ID3"
+      const size = (b[start + 6] & 0x7f) << 21 | (b[start + 7] & 0x7f) << 14 | (b[start + 8] & 0x7f) << 7 | (b[start + 9] & 0x7f);
+      start += 10 + size + (b[start + 5] & 0x10 ? 10 : 0);
+    }
+    while (start < b.length && start < 4096 && b[start] === 0) start++; // padding some taggers leave behind
+    if (!(b[start] === 0xff && (b[start + 1] & 0xe0) === 0xe0)) return null; // no MPEG audio frame here
+    let end = b.length;
+    const tagAt = i => i >= 0 && String.fromCharCode(b[i], b[i + 1], b[i + 2]);
+    if (end - start > 128 && tagAt(end - 128) === "TAG") end -= 128;
+    const ape = end - 32;
+    if (ape > start && String.fromCharCode(...b.subarray(ape, ape + 8)) === "APETAGEX") {
+      const dv = new DataView(buf, ape);
+      end -= dv.getUint32(12, true) + (dv.getUint32(20, true) & 0x80000000 ? 32 : 0);
+    }
+    return end > start ? new Blob([b.subarray(start, end)], { type: "audio/mpeg" }) : null;
+  }
+  function mediaDuration(url) {
+    return new Promise(res => {
+      const a = new Audio(); a.preload = "metadata";
+      a.onloadedmetadata = () => res(isFinite(a.duration) ? a.duration : 0);
+      a.onerror = () => res(-1);
+      a.src = url;
+    });
+  }
+
+  async function prepare(p) {
+    p.state = "working"; renderPending();
+    const buf = await p.file.arrayBuffer();
+    p.sha1 = await sha1(buf);
+    const known = lib.songs.find(s => s.sha1 === p.sha1) || pending.find(o => o !== p && o.sha1 === p.sha1 && o.state !== "error");
+    if (known) throw Object.assign(new Error("השיר כבר ברשימה"), { duplicate: known.number || known.title || true });
+    const plain = /\.mp3$/i.test(p.name) ? stripMp3(buf) : null;
+    if (plain) {
+      const url = URL.createObjectURL(plain);
+      const d = await mediaDuration(url);
+      if (d >= 0) { // the browser can play it, so it is good to go as-is
+        p.blob = plain; p.url = url; p.duration = d; p.file = null; p.state = "ready";
+        return;
+      }
+      URL.revokeObjectURL(url);
+    }
+    let audio;
+    try {
+      const ctx = new OfflineAudioContext(2, 44100, 44100); // decodes and resamples to 44.1 kHz
+      audio = await ctx.decodeAudioData(buf);
+    } catch (e) { throw new Error("הדפדפן לא הצליח לקרוא את הקובץ כשיר"); }
+    p.duration = audio.duration;
+    const left = new Float32Array(audio.getChannelData(0));
+    const right = audio.numberOfChannels > 1 ? new Float32Array(audio.getChannelData(1)) : new Float32Array(left);
+    p.blob = await encodeMp3(left, right, audio.sampleRate, prog => {
+      p.progress = prog;
+      const badge = document.querySelector(`.song[data-id="p${p.id}"] .badge`);
+      if (badge) badge.textContent = Math.round(prog * 100) + "%";
+    });
+    p.url = URL.createObjectURL(p.blob);
+    p.file = null; // free the original
+    p.state = "ready";
+  }
+  async function runQueue() {
+    if (preparing) return;
+    preparing = true;
+    $("prepProgress").hidden = false;
+    try {
+      let p;
+      while ((p = pending.find(x => x.state === "queued"))) {
+        const total = pending.length, done = pending.filter(x => x.state === "ready" || x.state === "error").length;
+        $("prepText").textContent = `מכין ${done + 1} מתוך ${total}: ${p.name}`;
+        $("prepBar").style.width = (done / total * 100) + "%";
+        try { await prepare(p); }
+        catch (e) {
+          if (e.duplicate) { pending = pending.filter(x => x !== p); toast(`"${p.name}" כבר ברשימה, דילגתי עליו`); }
+          else { p.state = "error"; p.error = e.message; }
+        }
+        renderPending();
+      }
+    } finally {
+      preparing = false; $("prepProgress").hidden = true; renderPending();
+    }
+  }
+  function addFiles(files) {
+    files = files.filter(f => AUDIO_EXT.test(f.name));
+    if (!files.length) return toast("לא נמצאו קבצי שירים בבחירה הזו", true);
+    files.sort((a, b) => a.name.localeCompare(b.name, "he"));
+    for (const f of files) pending.push({ id: nextPendingId++, file: f, name: f.name, title: "", artist: "", year: "", state: "queued", progress: 0 });
+    guessNames();
+    renderPending();
+    runQueue();
+  }
+  function removePending(p) {
+    if (previewId === "p" + p.id) stopPreview();
+    if (p.url) URL.revokeObjectURL(p.url);
+    pending = pending.filter(x => x !== p);
+    renderPending();
+  }
+
+  async function filesFromDrop(dt) {
+    const out = [], entries = [];
+    for (const item of dt.items || []) { const en = item.webkitGetAsEntry && item.webkitGetAsEntry(); if (en) entries.push(en); }
+    if (!entries.length) return [...(dt.files || [])];
+    async function walk(en) {
+      if (en.isFile) { out.push(await new Promise((res, rej) => en.file(res, rej))); return; }
+      if (en.isDirectory) {
+        const reader = en.createReader();
+        while (true) {
+          const batch = await new Promise((res, rej) => reader.readEntries(res, rej));
+          if (!batch.length) break;
+          for (const b of batch) await walk(b);
+        }
+      }
+    }
+    for (const en of entries) await walk(en);
+    return out;
+  }
+  $("pickFiles").addEventListener("click", e => { e.stopPropagation(); $("fileInput").click(); });
+  $("pickFolder").addEventListener("click", e => { e.stopPropagation(); $("folderInput").click(); });
+  $("drop").addEventListener("click", () => $("fileInput").click());
+  $("drop").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("fileInput").click(); } });
+  for (const id of ["fileInput", "folderInput"]) $(id).addEventListener("change", e => { addFiles([...e.target.files]); e.target.value = ""; });
+  let dragDepth = 0;
+  window.addEventListener("dragenter", e => { if (!$("app").hidden && [...e.dataTransfer.types].includes("Files")) { dragDepth++; document.body.classList.add("dragging"); } });
+  window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove("dragging"); });
+  window.addEventListener("dragover", e => e.preventDefault());
+  window.addEventListener("drop", async e => {
+    e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging");
+    if (!$("app").hidden) addFiles(await filesFromDrop(e.dataTransfer));
+  });
+
+  // ------------------------------------------------------------------ upload
+  $("uploadBtn").addEventListener("click", async () => {
+    if (busy) return;
+    const ready = pending.filter(p => p.state === "ready");
+    if (!ready.length) return;
+    const noYear = ready.filter(p => !(p.year || "").trim()).length;
+    if (noYear && !confirm(`ל־${noYear} שירים אין שנה. אפשר להעלות עכשיו ולהוסיף שנה אחר כך. להמשיך?`)) return;
+    busy = true; renderPending();
+    $("upProgress").hidden = false;
+    const label = $("uploadLabel");
+    try {
+      await flushEdits();
+      const fresh = await loadLibrary();
+      let next = fresh.next_number;
+      ready.forEach(p => { p.number = next++; });
+      // 1. upload the mp3 files (one blob each), then a single commit for all of them
+      const entries = [];
+      for (let i = 0; i < ready.length; i++) {
+        const p = ready[i];
+        $("upText").textContent = `מעלה ${i + 1} מתוך ${ready.length}: ${p.title || p.name}`;
+        $("upBar").style.width = (i / ready.length * 90) + "%";
+        label.textContent = `מעלה ${i + 1}/${ready.length}...`;
+        const blob = await gh(repoPath(CFG.siteRepo) + "/git/blobs", {
+          method: "POST", body: JSON.stringify({ content: await blobToB64(p.blob), encoding: "base64" }),
+        });
+        entries.push({ path: `songs/${p.number}.mp3`, sha: blob.sha });
+      }
+      $("upText").textContent = "שומר באתר..."; $("upBar").style.width = "93%";
+      await commitSite(entries, ready.length === 1 ? `שיר ${ready[0].number}` : `שירים ${ready[0].number}-${ready[ready.length - 1].number}`);
+      // 2. record the names (private repo)
+      $("upText").textContent = "שומר את רשימת השירים..."; $("upBar").style.width = "97%";
+      await saveLibrary(f => {
+        f.next_number = Math.max(f.next_number, next);
+        for (const p of ready) {
+          f.songs = f.songs.filter(s => s.number !== p.number);
+          f.songs.push({ number: p.number, title: p.title, artist: p.artist, year: p.year, year_source: p.year_source || "",
+                         original_name: p.name, duration: Math.round(p.duration || 0), sha1: p.sha1, added: new Date().toISOString() });
+        }
+      }, `הוספת ${ready.length} שירים`);
+      $("upBar").style.width = "100%";
+      for (const p of ready) { if (previewId === "p" + p.id) stopPreview(); URL.revokeObjectURL(p.url); }
+      pending = pending.filter(p => !ready.includes(p));
+      renderAll();
+      $("banners").innerHTML = `<div class="banner ok">${ICONS.ok}<div>הועלו ${ready.length} שירים (מספרים ${ready[0].number}–${ready[ready.length - 1].number}). הם יעבדו באתר תוך דקה בערך. עכשיו אפשר להדפיס את הקלפים החדשים.</div></div>`;
+      toast("השירים הועלו!");
+    } catch (e) {
+      ready.forEach(p => { delete p.number; });
+      toast("ההעלאה נכשלה: " + e.message, true);
+    } finally {
+      busy = false; $("upProgress").hidden = true; renderPending();
+    }
+  });
+
+  // ------------------------------------------------------------------ print
+  const DECADES = { 1940: "#7A6A58", 1950: "#8E4A7A", 1960: "#3E86C6", 1970: "#D9822B", 1980: "#D6455D", 1990: "#16786B", 2000: "#5E7FD0", 2010: "#5E9A3A", 2020: "#C24F2C" };
+  function decadeColor(y) {
+    if (!/^\d{4}$/.test(y || "")) return "#8A8178";
+    return DECADES[Math.max(1940, Math.min(2020, Math.floor(+y / 10) * 10))];
+  }
+  function qrSvg(text) {
+    const q = qrcode(0, "M"); q.addData(text); q.make();
+    return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
+  }
+  function cardsHtml(songs) {
+    const per = 12, cols = 3, pages = [];
+    for (let i = 0; i < songs.length; i += per) {
+      const chunk = songs.slice(i, i + per);
+      while (chunk.length < per) chunk.push(null);
+      const fronts = chunk.map(s => s ? `<div class="card front"><div class="brand">♪ קלפי שירים</div><div class="qr">${qrSvg(CFG.siteUrl + "#" + s.number)}</div><div class="num">${s.number}</div></div>` : '<div class="card empty"></div>');
+      const backs = [];
+      for (let r = 0; r < 4; r++) for (const s of chunk.slice(r * cols, r * cols + cols).reverse()) { // mirrored for long-edge duplex
+        backs.push(s ? `<div class="card back" style="--c:${decadeColor(s.year)}"><div class="artist fit">${esc(s.artist)}</div><div class="year">${esc(s.year || "????")}</div><div class="title fit">${esc(s.title)}</div><div class="bnum">${s.number}</div></div>` : '<div class="card empty"></div>');
+      }
+      pages.push(`<section class="sheet">${fronts.join("")}</section><section class="sheet">${backs.join("")}</section>`);
+    }
+    return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>קלפי שירים · להדפסה</title><style>
+@page{size:A4 portrait;margin:0}*{box-sizing:border-box;margin:0;padding:0}html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:"Segoe UI","Arial Hebrew",Arial,sans-serif;color:#1F1A15;background:#E9E2D6}
+.howto{max-width:210mm;margin:10mm auto 6mm;background:#FFFBF4;border:1px solid #E2D5C1;border-radius:12px;padding:14px 18px;line-height:1.6;font-size:14px}
+.howto h1{font-size:18px;margin-bottom:4px}.howto button{margin-top:8px;font:inherit;font-weight:700;padding:8px 18px;border-radius:10px;border:0;background:#E0563B;color:#fff;cursor:pointer}
+@media print{.howto{display:none}body{background:none}}
+.sheet{width:210mm;height:297mm;margin:0 auto;background:#fff;display:grid;grid-template-columns:repeat(3,60mm);grid-template-rows:repeat(4,60mm);justify-content:center;align-content:center;break-after:page;page-break-after:always;overflow:hidden}
+.sheet:last-of-type{break-after:auto;page-break-after:auto}
+@media screen{.sheet{margin:0 auto 8mm;box-shadow:0 6px 24px rgba(60,40,20,.18)}}
+.card{width:60mm;height:60mm;position:relative;overflow:hidden;outline:.2mm dashed #CFC5B8;outline-offset:-.1mm}.card.empty{outline:none}
+.front{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2mm}
+.front .brand{font-size:7.5pt;font-weight:700;letter-spacing:.3pt;color:#6F655A}.front .qr{width:38mm;height:38mm}.front .qr svg{width:100%;height:100%;display:block}
+.front .num{position:absolute;bottom:3mm;left:4mm;font-size:7.5pt;font-weight:700;color:#9A8F82;direction:ltr}
+.back{background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:6mm 5mm 5.5mm}
+.back::before{content:"";position:absolute;inset:3mm;border:.35mm solid rgba(255,255,255,.35);border-radius:3mm}
+.back .artist{height:14mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:12pt;font-weight:700;line-height:1.15;overflow:hidden}
+.back .year{font-size:34pt;font-weight:900;line-height:1}
+.back .title{height:16mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:500;line-height:1.2;overflow:hidden}
+.back .bnum{position:absolute;bottom:4.6mm;right:6mm;font-size:6.5pt;font-weight:700;opacity:.6;direction:ltr}
+</style></head><body>
+<div class="howto"><h1>איך מדפיסים</h1>הדפסה <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. כל דף שני הוא הגב של הדף שלפניו. גוזרים לאורך הקווים המקווקווים.<br><button onclick="print()">הדפסה</button></div>
+${pages.join("\n")}
+<script>for(const el of document.querySelectorAll(".fit")){let s=parseFloat(getComputedStyle(el).fontSize);while((el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&s>6){s-=.5;el.style.fontSize=s+"px"}}setTimeout(()=>print(),400)<\/script>
+</body></html>`;
+  }
+  async function printCards(onlyNew) {
+    await flushEdits();
+    const songs = [...lib.songs].filter(s => !onlyNew || s.number > lib.printed_upto).sort((a, b) => a.number - b.number);
+    if (!songs.length) return;
+    const missing = songs.filter(s => !(s.year || "").trim()).length;
+    if (missing && !confirm(`ל־${missing} קלפים אין שנה, ובגב שלהם יהיה כתוב "????". להדפיס בכל זאת?`)) return;
+    const w = window.open("", "_blank");
+    if (!w) return toast("הדפדפן חסם את חלון ההדפסה. אשרו חלונות קופצים לאתר הזה ונסו שוב.", true);
+    w.document.open(); w.document.write(cardsHtml(songs)); w.document.close();
+    const top = Math.max(...songs.map(s => s.number));
+    if (top > lib.printed_upto) {
+      try { await saveLibrary(f => { f.printed_upto = Math.max(f.printed_upto || 0, top); }, "סימון קלפים שהודפסו"); renderPrint(); }
+      catch (e) { toast(e.message, true); }
+    }
+  }
+  $("printNew").addEventListener("click", () => printCards(true).catch(e => toast(e.message, true)));
+  $("printAll").addEventListener("click", () => printCards(false).catch(e => toast(e.message, true)));
+
+  // ------------------------------------------------------------------ start
+  (async () => {
+    const t = storedToken();
+    if (!t) return showConnect();
+    try { await connect(t, !!(() => { try { return localStorage.getItem(TOKEN_KEY); } catch (e) { return ""; } })()); showApp(); }
+    catch (e) {
+      if (e.status === 401 || e.status === 404) { forgetToken(); return showConnect(e.message); }
+      token = t; showConnect(e.message);
+    }
+  })();
+})();
+</script>
+</body>
+</html>

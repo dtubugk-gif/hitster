@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#F5EEE1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="קלפי שירים">
+<title>קלפי שירים</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23211C17'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%23E0563B'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%23F5EEE1'/%3E%3C/svg%3E">
+<style>
+:root{
+  --paper:#F5EEE1; --paper-2:#EFE5D3; --ink:#211C17; --muted:#6F655A; --line:#E2D5C1;
+  --surface:#FFFBF4; --accent:#E0563B; --accent-ink:#fff; --teal:#16786B; --ring-bg:#E6DACA;
+  --vinyl:#171513; --groove-a:#1d1a17; --groove-b:#26221e;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#1B1815; --paper-2:#211D19; --ink:#F3EBDD; --muted:#B3A795; --line:#3A332B;
+    --surface:#26211C; --accent:#EC6A4F; --accent-ink:#1B1815; --teal:#4FB3A3; --ring-bg:#3A332B;
+    --vinyl:#0E0D0C; --groove-a:#141210; --groove-b:#1c1916;
+    color-scheme: dark;
+  }
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{
+  font-family:"Segoe UI",system-ui,-apple-system,"Rubik","Noto Sans Hebrew",Arial,sans-serif;
+  color:var(--ink);
+  background:radial-gradient(120% 70% at 50% 0%, var(--paper) 0%, var(--paper-2) 100%);
+  background-color:var(--paper);
+  display:flex;flex-direction:column;align-items:center;
+  min-height:100dvh;padding:max(16px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));
+  -webkit-tap-highlight-color:transparent;
+  overflow-x:hidden;
+}
+header{width:100%;max-width:440px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.2px;font-size:15px}
+.brand i{width:22px;height:22px;border-radius:50%;background:var(--vinyl);position:relative;display:inline-block}
+.brand i::after{content:"";position:absolute;inset:7px;border-radius:50%;background:var(--accent)}
+.chip{font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--line);
+  padding:5px 11px;border-radius:999px;white-space:nowrap}
+.chip:empty{display:none}
+
+main{flex:1;width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:16px 0}
+
+/* ---------- the record ---------- */
+.deck{position:relative;width:min(74vw,320px,40dvh);aspect-ratio:1;flex:none;margin:14px 0}
+.ring{position:absolute;inset:-14px;width:calc(100% + 28px);height:calc(100% + 28px);transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:5}
+.ring .bg{stroke:var(--ring-bg)}
+.ring .fg{stroke:var(--teal);stroke-linecap:round;transition:stroke-dashoffset .25s linear}
+.record{
+  position:absolute;inset:0;border-radius:50%;border:none;padding:0;cursor:pointer;
+  background:
+    radial-gradient(circle, transparent 0 32.5%, rgba(0,0,0,.55) 33%, transparent 34.5%),
+    repeating-radial-gradient(circle, var(--groove-a) 0 1.3px, var(--groove-b) 1.7px 2.9px),
+    var(--vinyl);
+  box-shadow:0 22px 40px -18px rgba(40,25,10,.55), 0 2px 0 rgba(255,255,255,.04) inset;
+  animation:spin 2.2s linear infinite;animation-play-state:paused;
+}
+.record::before{ /* label */
+  content:"";position:absolute;inset:33%;border-radius:50%;
+  background:
+    radial-gradient(circle, var(--paper) 0 7%, transparent 7.5%),
+    radial-gradient(circle, transparent 0 62%, rgba(0,0,0,.12) 63% 64%, transparent 65%),
+    conic-gradient(from 20deg, var(--accent), #e9724f, var(--accent), #cf4b32, var(--accent));
+}
+.record::after{ /* a small mark on the label so the spin is visible */
+  content:"";position:absolute;left:50%;top:36.5%;width:3.2%;height:8%;margin-left:-1.6%;border-radius:4px;
+  background:rgba(255,255,255,.55);
+}
+.playing .record{animation-play-state:running}
+.sheen{position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 210deg, transparent 0 8%, rgba(255,255,255,.10) 13%, transparent 20%, transparent 58%, rgba(255,255,255,.07) 64%, transparent 71%)}
+.icon{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.icon span{position:relative;width:21%;aspect-ratio:1;border-radius:50%;background:var(--surface);display:grid;place-items:center;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .2s ease}
+.icon svg{width:46%;height:46%;fill:var(--ink)}
+.record:active ~ .icon span{transform:scale(.92)}
+.record:focus-visible{outline:4px solid var(--teal);outline-offset:6px}
+.record:disabled{cursor:default}
+.loading .icon span::after{content:"";position:absolute;inset:-7px;border-radius:50%;
+  border:3px solid transparent;border-top-color:var(--teal);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.record{animation:none}}
+
+.time{font-variant-numeric:tabular-nums;font-size:15px;color:var(--muted);font-weight:600;min-height:1.2em;letter-spacing:.5px;direction:ltr;margin-top:-6px}
+
+.prompt{text-align:center}
+.prompt h1{font-size:clamp(22px,6.4vw,28px);line-height:1.2;font-weight:800;letter-spacing:-.2px}
+.prompt p{margin-top:8px;color:var(--muted);font-size:16px;line-height:1.5}
+
+.btn{
+  font:inherit;font-size:15px;font-weight:650;color:var(--ink);background:var(--surface);
+  border:1px solid var(--line);border-radius:14px;padding:11px 16px;min-height:48px;cursor:pointer;
+  display:inline-flex;align-items:center;gap:7px;box-shadow:0 1px 0 rgba(0,0,0,.03);
+  transition:transform .12s ease, background .2s ease;
+}
+.btn:active{transform:scale(.96)}
+.btn:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.btn svg{width:18px;height:18px;fill:currentColor;flex:none}
+.btn.primary{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.btn[disabled]{opacity:.45;pointer-events:none}
+.btn.scan{width:100%;max-width:330px;min-height:58px;justify-content:center;font-size:18px;font-weight:750;border-radius:18px;
+  box-shadow:0 14px 26px -16px color-mix(in srgb, var(--accent) 85%, transparent)}
+.btn.scan svg{width:22px;height:22px}
+
+/* media controls keep left-to-right order (rewind on the left) even in Hebrew */
+.controls{display:flex;gap:10px;justify-content:center;width:100%;direction:ltr}
+.controls .btn{justify-content:center}
+.controls #restart{flex:0 1 auto}
+.controls #back10,.controls #fwd10{min-width:78px;font-variant-numeric:tabular-nums}
+
+details.rules{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 16px}
+details.rules summary{cursor:pointer;font-weight:700;padding:12px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.rules summary::-webkit-details-marker{display:none}
+details.rules summary::after{content:"+";font-size:22px;color:var(--muted);line-height:1}
+details.rules[open] summary::after{content:"–"}
+details.rules ol{padding:0 20px 14px 0;line-height:1.65;color:var(--ink);font-size:15.5px}
+details.rules li{margin:3px 0}
+details.rules li b{font-weight:700}
+
+footer{font-size:12.5px;color:var(--muted);text-align:center}
+[hidden]{display:none !important}
+
+/* ---------- scanner ---------- */
+.scanner{position:fixed;inset:0;z-index:20;background:#000;color:#fff;overflow:hidden}
+.scanner video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scanner .frame{position:absolute;left:50%;top:44%;width:min(68vmin,320px);aspect-ratio:1;transform:translate(-50%,-50%);
+  border-radius:22px;box-shadow:0 0 0 100vmax rgba(0,0,0,.5)}
+.scanner .frame i{position:absolute;width:44px;height:44px;border:5px solid #fff;border-radius:6px}
+.scanner .frame i:nth-child(1){top:-3px;left:-3px;border-right:0;border-bottom:0;border-top-left-radius:22px}
+.scanner .frame i:nth-child(2){top:-3px;right:-3px;border-left:0;border-bottom:0;border-top-right-radius:22px}
+.scanner .frame i:nth-child(3){bottom:-3px;left:-3px;border-right:0;border-top:0;border-bottom-left-radius:22px}
+.scanner .frame i:nth-child(4){bottom:-3px;right:-3px;border-left:0;border-top:0;border-bottom-right-radius:22px}
+.scanner .frame b{position:absolute;left:8%;right:8%;height:3px;border-radius:3px;top:10%;
+  background:linear-gradient(90deg, transparent, var(--accent), transparent);animation:sweep 1.8s ease-in-out infinite alternate}
+@keyframes sweep{to{top:88%}}
+@media (prefers-reduced-motion: reduce){.scanner .frame b{animation:none;top:50%}}
+.scanner.found .frame i{border-color:#4FD1A5}
+.scanner .top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;
+  padding:max(14px,env(safe-area-inset-top)) 16px 14px;background:linear-gradient(rgba(0,0,0,.55), transparent)}
+.scanner .top strong{font-size:17px;font-weight:750}
+.scanner .close{width:46px;height:46px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:28px;line-height:1;cursor:pointer;display:grid;place-items:center}
+.scanner .close:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.scanner .msg{position:absolute;left:16px;right:16px;bottom:max(28px,env(safe-area-inset-bottom));text-align:center;
+  font-size:16.5px;font-weight:600;line-height:1.5;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+.scanner .msg.bad{color:#FFD2C7}
+.scanner .problem{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:32px;text-align:center;background:#1B1815}
+.scanner .problem p{font-size:17px;line-height:1.6;max-width:340px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><i aria-hidden="true"></i>קלפי שירים</div>
+  <div class="chip" id="chip"></div>
+</header>
+
+<main id="main">
+  <div class="deck" id="deck">
+    <svg class="ring" viewBox="0 0 100 100" aria-hidden="true">
+      <circle class="bg" cx="50" cy="50" r="47"/>
+      <circle class="fg" id="ringFg" cx="50" cy="50" r="47" stroke-dasharray="295.31" stroke-dashoffset="295.31"/>
+    </svg>
+    <button class="record" id="record" type="button" aria-label="נגן"></button>
+    <div class="sheen" aria-hidden="true"></div>
+    <div class="icon" aria-hidden="true"><span><svg id="icon" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg></span></div>
+  </div>
+
+  <div class="time" id="time" aria-live="off"></div>
+
+  <div class="prompt" id="prompt">
+    <h1 id="headline">מוכנים?</h1>
+    <p id="sub">הקישו על התקליט כדי לשמוע את השיר</p>
+  </div>
+
+  <div class="controls" id="controls" hidden>
+    <button class="btn" id="back10" type="button" aria-label="10 שניות אחורה"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6zm9 0V6l-8.5 6z"/></svg>10</button>
+    <button class="btn" id="restart" type="button"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>מההתחלה</button>
+    <button class="btn" id="fwd10" type="button" aria-label="10 שניות קדימה">10<svg viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6zm9-12v12l8.5-6z"/></svg></button>
+  </div>
+  <button class="btn primary" id="retry" type="button" hidden>נסו שוב</button>
+
+  <button class="btn primary scan" id="scanBtn" type="button" hidden>
+    <svg viewBox="0 0 24 24"><path d="M4 4h5v2H6v3H4zm11 0h5v5h-2V6h-3zM4 15h2v3h3v2H4zm14 3v-3h2v5h-5v-2zM7 7h4v4H7zm6 0h4v4h-4zM7 13h4v4H7zm8 0h2v2h-2zm-2 2h2v2h-2z"/></svg>
+    <span id="scanLabel">סריקת קלף</span>
+  </button>
+
+  <details class="rules" id="rules" hidden>
+    <summary>איך משחקים?</summary>
+    <ol>
+      <li>כל שחקן מקבל קלף אחד הפוך עם השנה למעלה: זו תחילת ציר הזמן שלו.</li>
+      <li>בתור שלכם, לוחצים על <b>סריקת קלף</b>, מכוונים את המצלמה לקלף חדש ומקשיבים לשיר בלי להציץ בגב.</li>
+      <li>מניחים את הקלף בציר הזמן איפה שחושבים שהשיר נמצא: לפני, אחרי או בין הקלפים שכבר יש לכם.</li>
+      <li>הופכים את הקלף. צדקתם? הקלף נשאר אצלכם. טעיתם? הוא יוצא מהמשחק.</li>
+      <li>בונוס: מי שמנחש גם את הזמר ואת שם השיר מקבל אסימון.</li>
+      <li>הראשון שמגיע ל־10 קלפים בציר הזמן מנצח.</li>
+    </ol>
+  </details>
+</main>
+
+<footer id="footer" hidden>סרקו את הקלף הבא עם מצלמת הטלפון</footer>
+
+<div class="scanner" id="scanner" hidden role="dialog" aria-modal="true" aria-label="סריקת קלף">
+  <video id="cam" playsinline muted autoplay></video>
+  <div class="frame" aria-hidden="true"><i></i><i></i><i></i><i></i><b></b></div>
+  <div class="top"><strong>סריקת קלף</strong><button class="close" id="scanClose" type="button" aria-label="סגירה">×</button></div>
+  <div class="msg" id="scanMsg" role="status" aria-live="polite"></div>
+  <div class="problem" id="scanProblem" hidden>
+    <p id="scanProblemText"></p>
+    <button class="btn primary" id="scanProblemClose" type="button">הבנתי</button>
+  </div>
+</div>
+
+<audio id="audio" preload="auto"></audio>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const audio = $("audio"), body = document.body, record = $("record");
+  const ring = $("ringFg"), RING = 295.31;
+  const ICON_PLAY = '<path d="M8 5.5v13l11-6.5z"/>';
+  const ICON_PAUSE = '<path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/>';
+  const ICON_QR = '<path d="M3 3h8v8H3zm2 2v4h4V5zm8-2h8v8h-8zm2 2v4h4V5zM3 13h8v8H3zm2 2v4h4v-4zm10-2h2v2h-2zm4 0h2v4h-2zm-6 4h2v4h-2zm4 2h2v2h-2zm2 2h2v2h-2z"/>';
+  const ICON_ALERT = '<path d="M11 6h2.4v8.2H11zm0 10.2h2.4v2.4H11z"/>';
+  // in-site scanning needs the camera, which browsers only allow on https (or this computer)
+  const canScan = window.isSecureContext && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+  let number = null, started = false, silent = false, unlocked = false;
+
+  function readNumber() {
+    const raw = (location.hash.slice(1) || new URLSearchParams(location.search).get("c") || "").trim();
+    return /^\d{1,6}$/.test(raw) ? String(parseInt(raw, 10)) : null;
+  }
+  function fmt(t) {
+    if (!isFinite(t) || t < 0) t = 0;
+    const m = Math.floor(t / 60), s = Math.floor(t % 60);
+    return m + ":" + String(s).padStart(2, "0");
+  }
+  function setText(h, p) { $("headline").textContent = h; $("sub").textContent = p; }
+  function setIcon(playing) { $("icon").innerHTML = playing ? ICON_PAUSE : ICON_PLAY; record.setAttribute("aria-label", playing ? "השהה" : "נגן"); }
+  function setRing(frac) { ring.style.strokeDashoffset = String(RING * (1 - Math.max(0, Math.min(1, frac)))); }
+  function showScan(label) {
+    $("scanBtn").hidden = !canScan;
+    $("scanLabel").textContent = label;
+    $("footer").hidden = canScan || !number;
+  }
+
+  function welcome() {
+    number = null;
+    audio.removeAttribute("src"); audio.load();
+    body.classList.remove("playing", "loading");
+    $("chip").textContent = ""; document.title = "קלפי שירים";
+    $("controls").hidden = true; $("retry").hidden = true; $("time").textContent = "";
+    $("rules").hidden = false;
+    record.disabled = !canScan; setRing(0);
+    $("icon").innerHTML = ICON_QR; record.setAttribute("aria-label", "סריקת קלף");
+    showScan("סריקת קלף");
+    setText("סרקו קלף כדי להתחיל", canScan
+      ? "לחצו על \"סריקת קלף\" וכוונו את המצלמה לקוד שעל הקלף. השיר יתנגן כאן, בלי לגלות את שמו."
+      : "פתחו את מצלמת הטלפון וכוונו אותה לקוד שעל הקלף. השיר יתנגן כאן, בלי לגלות את שמו.");
+  }
+
+  function load(n) {
+    number = n; started = false; silent = false;
+    document.title = "קלף " + n + " · קלפי שירים";
+    $("chip").textContent = "קלף " + n;
+    $("rules").hidden = true; $("retry").hidden = true;
+    $("controls").hidden = true; $("time").textContent = "";
+    record.disabled = false;
+    body.classList.remove("playing"); setIcon(false); setRing(0);
+    showScan("סריקת הקלף הבא");
+    setText("מוכנים?", "הקישו על התקליט כדי לשמוע את השיר");
+    audio.src = "songs/" + n + ".mp3";
+    audio.load();
+    // after a scan the audio is already unlocked, so this starts the song right away;
+    // when a card is opened with the phone camera instead, browsers usually wait for a tap
+    body.classList.add("loading");
+    audio.play().catch(() => body.classList.remove("loading"));
+    if ("mediaSession" in navigator) {
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: "שיר מסתורי", artist: "קלפי שירים" }); } catch (e) {}
+    }
+  }
+
+  function toggle() {
+    if (!number) { if (canScan) openScanner(); return; }
+    if (audio.paused) {
+      body.classList.add("loading");
+      const p = audio.play();
+      if (p) p.catch(err => { body.classList.remove("loading"); if (err && err.name !== "AbortError") showError(); });
+    } else {
+      audio.pause();
+    }
+  }
+
+  async function showError() {
+    body.classList.remove("playing", "loading");
+    $("icon").innerHTML = ICON_ALERT; record.setAttribute("aria-label", "השיר לא נטען");
+    $("controls").hidden = true; record.disabled = true;
+    let missing = false;
+    try { const r = await fetch("songs/" + number + ".mp3", { method: "HEAD", cache: "no-store" }); missing = r.status === 404; } catch (e) {}
+    if (missing) {
+      setText("הקלף הזה לא נמצא", "אין שיר מספר " + number + " במשחק. אולי הקלפים הודפסו מגרסה ישנה, או שהשירים עוד לא הועלו לאתר?");
+      $("retry").hidden = true;
+    } else {
+      setText("השיר לא נטען", "בדקו שהטלפון מחובר לאינטרנט ונסו שוב.");
+      $("retry").hidden = false;
+    }
+  }
+
+  record.addEventListener("click", toggle);
+  $("retry").addEventListener("click", () => { record.disabled = false; load(number); });
+  $("restart").addEventListener("click", () => { audio.currentTime = 0; if (audio.paused) toggle(); });
+  $("back10").addEventListener("click", () => { audio.currentTime = Math.max(0, audio.currentTime - 10); });
+  $("fwd10").addEventListener("click", () => { if (isFinite(audio.duration)) audio.currentTime = Math.min(audio.duration - 0.5, audio.currentTime + 10); else audio.currentTime += 10; });
+
+  audio.addEventListener("playing", () => {
+    unlocked = true;
+    if (silent) return;
+    started = true;
+    body.classList.remove("loading"); body.classList.add("playing"); setIcon(true);
+    $("controls").hidden = false;
+    setText("מי שר? ובאיזו שנה?", "מקמו את הקלף בציר הזמן, ורק אז הפכו אותו");
+  });
+  audio.addEventListener("waiting", () => { if (!silent) body.classList.add("loading"); });
+  audio.addEventListener("pause", () => {
+    if (silent) return;
+    body.classList.remove("playing", "loading");
+    if (record.disabled) return; // a failed load also fires "pause"; keep the error icon
+    setIcon(false);
+    if (started && !audio.ended) setText("בהשהיה", "הקישו על התקליט כדי להמשיך");
+  });
+  audio.addEventListener("ended", () => {
+    if (silent) return;
+    setRing(1);
+    setText("השיר נגמר", "סרקו את הקלף הבא, או הקישו על התקליט כדי לשמוע שוב");
+  });
+  audio.addEventListener("timeupdate", () => {
+    if (!started || silent) return;
+    $("time").textContent = fmt(audio.currentTime);
+    if (isFinite(audio.duration) && audio.duration > 0) setRing(audio.currentTime / audio.duration);
+  });
+  audio.addEventListener("error", () => { if (!silent && number && audio.getAttribute("src")) showError(); });
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && !$("scanner").hidden) { closeScanner(); return; }
+    if (e.code === "Space" && number && e.target === document.body) { e.preventDefault(); toggle(); }
+  });
+  window.addEventListener("hashchange", () => { const n = readNumber(); n ? load(n) : welcome(); });
+
+  // ---------------------------------------------------------------- scanner
+  const cam = $("cam"), scanner = $("scanner");
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  let stream = null, scanning = false, detector = null, jsqrLoad = null, timer = 0, popClose = null;
+
+  // a fraction of a second of silence: playing it inside the tap "unlocks" the audio
+  // element on iPhones, so the song can start by itself once the code is read
+  const SILENT = (() => {
+    const n = 2205, buf = new ArrayBuffer(44 + n * 2), v = new DataView(buf);
+    const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+    w(0, "RIFF"); v.setUint32(4, 36 + n * 2, true); w(8, "WAVE"); w(12, "fmt ");
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, 44100, true); v.setUint32(28, 88200, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true);
+    w(36, "data"); v.setUint32(40, n * 2, true);
+    return URL.createObjectURL(new Blob([buf], { type: "audio/wav" }));
+  })();
+  function unlockAudio() {
+    if (!audio.paused) audio.pause();
+    if (unlocked) return;
+    silent = true;
+    audio.src = SILENT;
+    audio.play().then(() => { unlocked = true; audio.pause(); }).catch(() => {});
+  }
+
+  function loadJsQR() {
+    if (window.jsQR) return Promise.resolve();
+    if (!jsqrLoad) jsqrLoad = new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "jsQR.js"; s.onload = res; s.onerror = () => { jsqrLoad = null; rej(new Error("jsQR")); };
+      document.head.appendChild(s);
+    });
+    return jsqrLoad;
+  }
+
+  function setMsg(text, bad) { const m = $("scanMsg"); m.textContent = text; m.classList.toggle("bad", !!bad); }
+  function problem(text) {
+    stopCamera();
+    $("scanProblemText").textContent = text;
+    $("scanProblem").hidden = false;
+  }
+
+  async function openScanner() {
+    if (!canScan || scanning || !scanner.hidden) return;
+    unlockAudio();
+    scanner.hidden = false; scanner.classList.remove("found"); $("scanProblem").hidden = true;
+    history.pushState({ scanner: true }, "", location.href); // the phone's Back button closes the camera
+    setMsg("פותח את המצלמה...");
+    $("scanClose").focus({ preventScroll: true });
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: false, video: { facingMode: { ideal: "environment" }, width: { ideal: 1280 }, height: { ideal: 720 } } });
+    } catch (e) {
+      if (scanner.hidden) return;
+      if (e && (e.name === "NotAllowedError" || e.name === "SecurityError"))
+        return problem("אין גישה למצלמה. אשרו לאתר להשתמש במצלמה (בהגדרות הדפדפן, ליד הכתובת), או סרקו את הקלף עם אפליקציית המצלמה של הטלפון.");
+      if (e && (e.name === "NotFoundError" || e.name === "OverconstrainedError"))
+        return problem("לא נמצאה מצלמה במכשיר הזה. אפשר לסרוק את הקלף עם טלפון אחר.");
+      return problem("לא הצלחתי לפתוח את המצלמה. סגרו אפליקציות אחרות שמשתמשות בה ונסו שוב.");
+    }
+    if (scanner.hidden) { stopCamera(); return; } // closed while the permission prompt was open
+    cam.srcObject = stream;
+    try { await cam.play(); } catch (e) {}
+    if (!detector && "BarcodeDetector" in window) {
+      try {
+        const formats = await BarcodeDetector.getSupportedFormats();
+        if (formats.includes("qr_code")) detector = new BarcodeDetector({ formats: ["qr_code"] });
+      } catch (e) {}
+    }
+    if (!detector) {
+      try { await loadJsQR(); } catch (e) { return problem("לא הצלחתי לטעון את קורא הקודים. בדקו את החיבור לאינטרנט ונסו שוב."); }
+    }
+    if (scanner.hidden) { stopCamera(); return; }
+    setMsg("כוונו את המצלמה אל הקוד שעל הקלף");
+    scanning = true;
+    tick();
+  }
+
+  async function readFrame() {
+    if (detector) {
+      const codes = await detector.detect(cam);
+      return codes.length ? codes[0].rawValue : null;
+    }
+    const vw = cam.videoWidth, vh = cam.videoHeight;
+    if (!vw || !vh) return null;
+    // look at the centre square only (where the frame is drawn): faster and fewer false reads
+    const side = Math.min(vw, vh), sx = (vw - side) / 2, sy = (vh - side) / 2;
+    const size = Math.min(side, 640);
+    canvas.width = canvas.height = size;
+    ctx.drawImage(cam, sx, sy, side, side, 0, 0, size, size);
+    const img = ctx.getImageData(0, 0, size, size);
+    const hit = window.jsQR(img.data, size, size, { inversionAttempts: "dontInvert" });
+    return hit ? hit.data : null;
+  }
+
+  let badUntil = 0;
+  async function tick() {
+    if (!scanning) return;
+    let text = null;
+    if (cam.readyState >= 2) { try { text = await readFrame(); } catch (e) {} }
+    if (!scanning) return;
+    if (text) {
+      const t = String(text).trim();
+      const m = t.match(/#(\d{1,6})\s*$/) || t.match(/^(\d{1,6})$/);
+      if (m) return found(String(parseInt(m[1], 10)));
+      if (Date.now() > badUntil) { setMsg("זה לא קלף של המשחק. נסו קלף אחר", true); badUntil = Date.now() + 1800; }
+    } else if (badUntil && Date.now() > badUntil) {
+      badUntil = 0; setMsg("כוונו את המצלמה אל הקוד שעל הקלף");
+    }
+    timer = setTimeout(tick, detector ? 120 : 90);
+  }
+
+  function found(n) {
+    scanning = false;
+    scanner.classList.add("found");
+    if (navigator.vibrate) navigator.vibrate(40);
+    setMsg("נמצא! מנגן...");
+    stopCamera();
+    setTimeout(() => closeScanner(() => {   // a short green flash so it is clear the card was read
+      history.replaceState(null, "", "#" + n);
+      load(n);
+    }), 220);
+  }
+
+  function stopCamera() {
+    scanning = false; clearTimeout(timer);
+    if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    cam.srcObject = null;
+  }
+
+  function closeScanner(after) {
+    stopCamera();
+    scanner.hidden = true;
+    if (!after && silent) {
+      // cancelled: put the card that was loaded before back in place of the unlock clip
+      silent = false;
+      if (number) { audio.src = "songs/" + number + ".mp3"; audio.load(); } else audio.removeAttribute("src");
+    }
+    if (history.state && history.state.scanner) {
+      popClose = after || (() => {});
+      history.back(); // removes the entry added on open; "popstate" then runs `after`
+    } else if (after) after();
+    if (!after) $("scanBtn").focus({ preventScroll: true });
+  }
+
+  window.addEventListener("popstate", () => {
+    if (popClose) { const f = popClose; popClose = null; f(); return; }
+    if (!scanner.hidden) { stopCamera(); scanner.hidden = true; } // Back pressed while scanning
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden && !scanner.hidden) closeScanner();
+  });
+  $("scanBtn").addEventListener("click", openScanner);
+  $("scanClose").addEventListener("click", () => closeScanner());
+  $("scanProblemClose").addEventListener("click", () => closeScanner());
+
+  // ---------------------------------------------------------------- start
+  const n = readNumber();
+  n ? load(n) : welcome();
+})();
+</script>
+</body>
+</html>

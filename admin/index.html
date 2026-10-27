@@ -343,7 +343,7 @@ body.dragging .overlay{display:grid}
       <div class="panel-head">
         <div class="step">3</div>
         <h2>הדפסת קלפים</h2>
-        <div class="meta">QR מקדימה, שנה וזמר מאחורה. דו־צדדי, היפוך לאורך הצד הארוך, בגודל 100%.</div>
+        <div class="meta">כל קלף בדף A4 משלו, בשחור־לבן. דו־צדדי, היפוך לאורך הצד הארוך, בגודל 100%.</div>
       </div>
       <div class="panel-body print-row">
         <button class="btn primary" type="button" id="printNew"><svg viewBox="0 0 24 24"><path d="M7 3h10v4H7zM5 8h14a2 2 0 0 1 2 2v6h-4v4H7v-4H3v-6a2 2 0 0 1 2-2zm4 8v2h6v-4H9z"/></svg><span id="printNewLabel">הדפסת הקלפים החדשים</span></button>
@@ -1337,86 +1337,76 @@ body.dragging .overlay{display:grid}
   });
 
   // ------------------------------------------------------------------ print
-  const DECADES = { 1940: "#7A6A58", 1950: "#8E4A7A", 1960: "#3E86C6", 1970: "#D9822B", 1980: "#D6455D", 1990: "#16786B", 2000: "#5E7FD0", 2010: "#5E9A3A", 2020: "#C24F2C" };
-  function decadeColor(y) {
-    if (!/^\d{4}$/.test(y || "")) return "#8A8178";
-    return DECADES[Math.max(1940, Math.min(2020, Math.floor(+y / 10) * 10))];
-  }
-  // level L keeps the back code small enough (29x29) to fit under the song details
-  function qrSvg(text, level) {
-    const q = qrcode(0, level || "M"); q.addData(text); q.make();
+  function qrSvg(text) {
+    const q = qrcode(0, "M"); q.addData(text); q.make();
     return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
   }
   const MIC = '<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>';
   const NOTE = '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg>';
-  // front: the code for the original song. back: year, artist, title, and the code for our performance
+  // one card per A4 sheet, black ink only. page 1: the code for the original song.
+  // page 2 (the back of the same sheet): year, artist, title, and the code for our performance
   function cardsHtml(songs) {
-    const per = 12, cols = 3, pages = [];
-    const front = s => `<div class="card front">
+    const front = s => `<section class="sheet front">
       <div class="brand">קלפי שירים</div>
       <div class="qr">${qrSvg(CFG.siteUrl + "#" + s.number)}</div>
       <div class="cap">${NOTE}השיר המקורי</div>
-      <div class="num">${s.number}</div></div>`;
-    const back = s => `<div class="card back${s.ours ? "" : " solo"}" style="--c:${decadeColor(s.year)}">
+      <div class="hint">סרקו עם הטלפון, הקשיבו, ונחשו באיזו שנה הוא יצא</div>
+      <div class="num">${s.number}</div></section>`;
+    const back = s => `<section class="sheet back${s.ours ? "" : " solo"}">
       <div class="info">
         <div class="artist fit">${esc(s.artist)}</div>
-        <div class="year">${esc(s.year || "????")}</div>
+        <div class="year"><span>${esc(s.year || "????")}</span></div>
         <div class="title fit">${esc(s.title)}</div>
       </div>
       ${s.ours ? `<div class="ours">
-        <div class="otext">${MIC}<b>הביצוע שלנו</b><span>סרקו כדי לשמוע</span><i>קלף ${s.number}</i></div>
-        <div class="tile">${qrSvg(CFG.siteUrl + "#" + s.number + "-b", "L")}</div>
-      </div>` : `<div class="bnum">קלף ${s.number}</div>`}</div>`;
-    for (let i = 0; i < songs.length; i += per) {
-      const chunk = songs.slice(i, i + per);
-      while (chunk.length < per) chunk.push(null);
-      const fronts = chunk.map(s => s ? front(s) : '<div class="card empty"></div>');
-      const backs = [];
-      for (let r = 0; r < 4; r++) for (const s of chunk.slice(r * cols, r * cols + cols).reverse()) // mirrored for long-edge duplex
-        backs.push(s ? back(s) : '<div class="card empty"></div>');
-      pages.push(`<section class="sheet">${fronts.join("")}</section><section class="sheet">${backs.join("")}</section>`);
-    }
+        <div class="otext">${MIC}<b>הביצוע שלנו</b><span>סרקו כדי לשמוע</span></div>
+        <div class="tile">${qrSvg(CFG.siteUrl + "#" + s.number + "-b")}</div>
+      </div>` : ""}
+      <div class="bnum">קלף ${s.number}</div></section>`;
+    const pages = songs.map(s => front(s) + back(s));
     return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>קלפי שירים · להדפסה</title><style>
 @page{size:A4 portrait;margin:0}*{box-sizing:border-box;margin:0;padding:0}html,body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-body{font-family:"Segoe UI","Arial Hebrew",Arial,sans-serif;color:#1F1A15;background:#E9E2D6}
+body{font-family:"Segoe UI","Arial Hebrew",Arial,sans-serif;color:#000;background:#E9E2D6}
 .howto{max-width:210mm;margin:10mm auto 6mm;background:#FFFBF4;border:1px solid #E2D5C1;border-radius:12px;padding:14px 18px;line-height:1.6;font-size:14px}
 .howto h1{font-size:18px;margin-bottom:4px}.howto button{margin-top:8px;font:inherit;font-weight:700;padding:8px 18px;border-radius:10px;border:0;background:#E0563B;color:#fff;cursor:pointer}
 @media print{.howto{display:none}body{background:none}}
-.sheet{width:210mm;height:297mm;margin:0 auto;background:#fff;display:grid;grid-template-columns:repeat(3,60mm);grid-template-rows:repeat(4,60mm);justify-content:center;align-content:center;break-after:page;page-break-after:always;overflow:hidden}
+/* one A4 page per side of a card. black ink on white paper only, no greys or colour, so any printer prints it crisp */
+.sheet{width:210mm;height:297mm;margin:0 auto;position:relative;overflow:hidden;background:#fff;color:#000;display:flex;flex-direction:column;align-items:center;text-align:center;break-after:page;page-break-after:always}
 .sheet:last-of-type{break-after:auto;page-break-after:auto}
+.sheet::before{content:"";position:absolute;inset:12mm;border:.9mm solid #000;border-radius:9mm;pointer-events:none}
 @media screen{.sheet{margin:0 auto 8mm;box-shadow:0 6px 24px rgba(60,40,20,.18)}}
-.card{width:60mm;height:60mm;position:relative;overflow:hidden;outline:.2mm dashed #CFC5B8;outline-offset:-.1mm}.card.empty{outline:none}
 svg{display:block}
 /* front */
-.front{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4mm;padding-top:.6mm}
-.front .brand{font-size:7pt;font-weight:700;letter-spacing:.6pt;color:#8A7F72}
-.front .qr{width:35mm;height:35mm}.front .qr svg{width:100%;height:100%}
-.front .cap{display:flex;align-items:center;gap:1mm;font-size:8pt;font-weight:700;color:#1F1A15}
-.front .cap svg{width:3.2mm;height:3.2mm;fill:#E0563B}
-.front .num{position:absolute;bottom:3mm;left:4mm;font-size:7pt;font-weight:700;color:#A2978A;direction:ltr}
+.front{justify-content:center;gap:9mm;padding:22mm 24mm}
+.front .brand{font-size:22pt;font-weight:800;letter-spacing:2pt}
+.front .qr{width:140mm;height:140mm}.front .qr svg{width:100%;height:100%}
+.front .cap{display:flex;align-items:center;gap:3mm;font-size:30pt;font-weight:800}
+.front .cap svg{width:11mm;height:11mm;fill:#000}
+.front .hint{font-size:14pt;font-weight:500;margin-top:-5mm}
+.front .num{position:absolute;bottom:20mm;left:22mm;font-size:18pt;font-weight:800;direction:ltr}
 /* back */
-.back{background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:4.2mm 4.8mm 3.9mm}
-.back::before{content:"";position:absolute;inset:2.6mm;border:.3mm solid rgba(255,255,255,.38);border-radius:3mm;pointer-events:none}
-.back .info{width:100%;display:flex;flex-direction:column;align-items:center;gap:.3mm}
-.back .artist{height:8.2mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;line-height:1.12;overflow:hidden}
-.back .year{font-size:24pt;font-weight:900;line-height:.98;letter-spacing:-.2pt;font-variant-numeric:tabular-nums}
-.back .title{height:7.6mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:9pt;font-weight:500;line-height:1.15;overflow:hidden}
-.back .ours{display:flex;align-items:center;justify-content:center;gap:2.6mm}
-.back .tile{width:23.4mm;height:23.4mm;padding:1.6mm;background:#fff;border-radius:2mm;flex:none}
+.back{justify-content:space-evenly;padding:22mm 24mm 30mm}
+.back .info{width:100%;display:flex;flex-direction:column;align-items:center;gap:3mm}
+.back .artist{height:34mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:36pt;font-weight:800;line-height:1.12;overflow:hidden}
+.back .year{width:100%;display:flex;align-items:center;gap:7mm;font-size:96pt;font-weight:900;line-height:1;letter-spacing:-1pt;font-variant-numeric:tabular-nums}
+.back .year::before,.back .year::after{content:"";flex:1;border-top:1.1mm solid #000}
+.back .title{height:30mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:30pt;font-weight:500;line-height:1.15;overflow:hidden}
+.back .ours{display:flex;align-items:center;justify-content:center;gap:9mm}
+.back .tile{width:92mm;height:92mm;flex:none}
 .back .tile svg{width:100%;height:100%}
-.back .otext{display:flex;flex-direction:column;align-items:flex-start;text-align:right;line-height:1.2}
-.back .otext svg{width:4.2mm;height:4.2mm;fill:#fff;margin-bottom:.6mm}
-.back .otext b{font-size:8.5pt;font-weight:800}
-.back .otext span{font-size:6.5pt;opacity:.88}
-.back .otext i{font-style:normal;font-size:6pt;font-weight:700;opacity:.6;margin-top:1.2mm}
-.back.solo{justify-content:center;gap:3mm}
-.back.solo .artist{height:13mm;font-size:12pt}.back.solo .year{font-size:34pt}.back.solo .title{height:14mm;font-size:11pt}
-.back .bnum{position:absolute;bottom:4.4mm;left:0;right:0;font-size:6pt;font-weight:700;opacity:.6}
+.back .otext{display:flex;flex-direction:column;align-items:flex-start;text-align:right;line-height:1.25}
+.back .otext svg{width:13mm;height:13mm;fill:#000;margin-bottom:2mm}
+.back .otext b{font-size:26pt;font-weight:800}
+.back .otext span{font-size:15pt}
+.back.solo{justify-content:center}
+.back.solo .artist{height:50mm;font-size:44pt}.back.solo .year{font-size:130pt;margin:8mm 0}.back.solo .title{height:44mm;font-size:36pt}
+.back .bnum{position:absolute;bottom:19mm;left:24mm;right:24mm;font-size:14pt;font-weight:800}
 </style></head><body>
-<div class="howto"><h1>איך מדפיסים</h1>הדפסה <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. כל דף שני הוא הגב של הדף שלפניו. גוזרים לאורך הקווים המקווקווים.<br>
+<div class="howto"><h1>איך מדפיסים</h1>כל קלף מקבל <b>דף A4 משלו</b>: עמוד אחד הוא החזית ועמוד אחריו הגב. מדפיסים <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. אין מה לגזור.<br>
+הקלפים בשחור־לבן, כך שאפשר להדפיס במדפסת רגילה בלי צבע. במדפסת בלי הדפסה דו־צדדית: מדפיסים את העמודים האי־זוגיים, מחזירים את הדפים למגש ומדפיסים את הזוגיים.<br>
 מקדימה: הקוד של <b>השיר המקורי</b>. מאחורה: השנה, הזמר, שם השיר והקוד של <b>הביצוע שלנו</b>.<br><button onclick="print()">הדפסה</button></div>
 ${pages.join("\n")}
-<script>for(const el of document.querySelectorAll(".fit")){let s=parseFloat(getComputedStyle(el).fontSize);while((el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&s>6){s-=.5;el.style.fontSize=s+"px"}}setTimeout(()=>print(),400)<\/script>
+<script>for(const el of document.querySelectorAll(".fit")){let s=parseFloat(getComputedStyle(el).fontSize);while((el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&s>14){s-=1;el.style.fontSize=s+"px"}}setTimeout(()=>print(),400)<\/script>
 </body></html>`;
   }
   if (["localhost", "127.0.0.1"].includes(location.hostname)) window.__cardsHtml = cardsHtml; // for the print tests

@@ -79,12 +79,6 @@ a{color:var(--teal)}
 .connect code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:13.5px}
 .token-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .token-row input[type=password]{flex:1;min-width:240px;direction:ltr;text-align:left;border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;background:var(--surface);min-height:46px;font-family:Consolas,monospace}
-.token-row input.pass{direction:rtl;text-align:right;font-family:inherit;font-size:16px}
-#passForm{margin:14px 0 4px}
-.token-row input.pass:placeholder-shown{direction:rtl}
-.connect .by-key{margin-top:18px;border-top:1px solid var(--line);padding-top:12px}
-.connect .by-key summary{cursor:pointer;font-weight:700;color:var(--muted);padding:4px 0}
-.connect .by-key[open] summary{margin-bottom:8px}
 .check{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:14px;margin-top:10px;cursor:pointer}
 .note{font-size:13px;color:var(--muted);margin-top:10px}
 
@@ -234,18 +228,9 @@ body.dragging .overlay{display:grid}
 
   <!-- connect -->
   <section class="panel connect" id="connectPanel" hidden>
-    <div class="panel-head"><div class="step">🔑</div><h2>כניסה לניהול השירים</h2></div>
+    <div class="panel-head"><div class="step">🔑</div><h2>חיבור ל-GitHub (פעם אחת)</h2></div>
     <div class="panel-body">
-      <p>מקלידים את הסיסמה המשפחתית, ואפשר להוסיף שירים מכל מכשיר. בלי מפתחות ובלי GitHub.</p>
-      <form class="token-row" id="passForm" autocomplete="on">
-        <input type="text" name="username" value="קלפי שירים" autocomplete="username" hidden>
-        <input type="password" id="passInput" class="pass" placeholder="הסיסמה המשפחתית" aria-label="הסיסמה המשפחתית" autocomplete="current-password">
-        <button class="btn primary" type="submit" id="passBtn">כניסה</button>
-      </form>
-      <label class="check"><input type="checkbox" id="remember" checked> לזכור אותי במכשיר הזה</label>
-      <details class="by-key" id="byKey">
-        <summary>כניסה עם מפתח GitHub במקום סיסמה</summary>
-      <p>אפשר גם להתחבר עם מפתח גישה מהחשבון שלכם ב-GitHub. המפתח פותח רק את שני המאגרים של המשחק.</p>
+      <p>כדי שהדף הזה יוכל להעלות שירים לאתר, הוא צריך מפתח גישה מהחשבון שלכם ב-GitHub. המפתח פותח רק את שני המאגרים של המשחק.</p>
       <ol>
         <li>פתחו את <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">דף יצירת המפתח ב-GitHub</a> (צריך להיות מחוברים לחשבון <b id="ownerName"></b>).</li>
         <li><b>Token name:</b> כתבו <code>קלפי שירים</code>. <b>Expiration:</b> בחרו כמה זמן המפתח יעבוד (למשל 366 days).</li>
@@ -258,8 +243,8 @@ body.dragging .overlay{display:grid}
         <input type="password" id="tokenInput" placeholder="github_pat_..." aria-label="מפתח GitHub" spellcheck="false" autocomplete="off">
         <button class="btn primary" type="submit" id="tokenBtn">התחברות</button>
       </form>
+      <label class="check"><input type="checkbox" id="remember" checked> לזכור את המפתח במכשיר הזה</label>
       <p class="note">המפתח נשמר רק בדפדפן הזה ונשלח רק ל-GitHub. אל תשתפו אותו עם אף אחד. אפשר לבטל אותו בכל רגע בהגדרות של GitHub.</p>
-      </details>
     </div>
   </section>
 
@@ -380,19 +365,17 @@ body.dragging .overlay{display:grid}
     dataRepo: "hitster-data",
     siteUrl: "https://dtubugk-gif.github.io/hitster/",
     api: "https://api.github.com",
-    keyServer: "https://kalfei-shirim-key.netlify.app/gh", // holds the GitHub key; devices sign in with the family password
   };
   // test hooks, honoured only on this computer so a crafted link can never send the key elsewhere
   if (["localhost", "127.0.0.1"].includes(location.hostname)) {
     const q = new URLSearchParams(location.search);
     try { // kept for the session, so they survive the page reload that follows a share
-      for (const k of ["api", "site", "key"]) { if (q.get(k)) sessionStorage.setItem("test-" + k, q.get(k)); else if (sessionStorage.getItem("test-" + k)) q.set(k, sessionStorage.getItem("test-" + k)); }
+      for (const k of ["api", "site"]) { if (q.get(k)) sessionStorage.setItem("test-" + k, q.get(k)); else if (sessionStorage.getItem("test-" + k)) q.set(k, sessionStorage.getItem("test-" + k)); }
     } catch (e) {}
     if (q.get("api")) CFG.api = q.get("api");
     if (q.get("site")) CFG.siteUrl = q.get("site");
-    if (q.get("key")) CFG.keyServer = q.get("key");
   }
-  const TOKEN_KEY = "kalfei-shirim.token", PASS_KEY = "kalfei-shirim.password";
+  const TOKEN_KEY = "kalfei-shirim.token";
   const en = s => "⁨" + s + "⁩"; // keeps English button names in order inside a Hebrew sentence
   const NO_WRITE = `למפתח אין הרשאה לשמור קבצים. צרו מפתח חדש, וב-${en("Permissions")} לחצו ${en("+ Add permissions")}, סמנו ${en("Contents")}, ואז שנו את ${en("Access: Read-only")} ל-${en("Read and write")}.`;
 
@@ -413,7 +396,7 @@ body.dragging .overlay{display:grid}
   };
   const AUDIO_EXT = /\.(mp3|m4a|aac|wav|flac|ogg|oga|opus|webm|mp4|aiff?)$/i;
 
-  let token = "", password = "", lib = null, libSha = null, pending = [], busy = false;
+  let token = "", lib = null, libSha = null, pending = [], busy = false;
 
   // ------------------------------------------------------------------ helpers
   function esc(s) { return String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
@@ -452,31 +435,20 @@ body.dragging .overlay{display:grid}
   }
 
   // ------------------------------------------------------------------ GitHub
-  // with the family password, calls go through the key server, which adds the GitHub key itself
-  const SERVER_ERRORS = {
-    "bad-password": "הסיסמה לא נכונה. נסו שוב.",
-    "not-configured": "השרת של הניהול עוד לא הוגדר: צריך לשים את הסיסמה המשפחתית ואת המפתח של GitHub בהגדרות של האתר kalfei-shirim-key ב-Netlify. בינתיים אפשר להיכנס עם מפתח GitHub.",
-    "weak-password": "הסיסמה המשפחתית שהוגדרה בשרת קצרה מדי. היא צריכה להיות באורך 8 תווים לפחות.",
-    "github-token": "המפתח של GitHub ששמור בשרת כבר לא עובד (אולי פג תוקפו). צרו מפתח חדש והחליפו אותו בהגדרות של Netlify.",
-    "github-unreachable": "השרת לא הצליח להגיע ל-GitHub. נסו שוב בעוד רגע.",
-  };
   async function gh(path, opts = {}) {
-    const headers = { "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
-    if (password) headers["X-Family-Password"] = encodeURIComponent(password); // headers only carry Latin letters, and the password may be Hebrew
-    else headers["Authorization"] = "Bearer " + token;
+    const headers = { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
     if (opts.body) headers["Content-Type"] = "application/json";
     let res;
     try {
-      res = await fetch((password ? CFG.keyServer : CFG.api) + path, { ...opts, headers, cache: "no-store" });
+      res = await fetch(CFG.api + path, { ...opts, headers, cache: "no-store" });
     } catch (e) {
-      throw Object.assign(new Error(password ? "אין חיבור לשרת של הניהול. בדקו את האינטרנט ונסו שוב." : "אין חיבור ל-GitHub. בדקו את האינטרנט ונסו שוב."), { status: 0 });
+      throw Object.assign(new Error("אין חיבור ל-GitHub. בדקו את האינטרנט ונסו שוב."), { status: 0 });
     }
     if (res.status === 204) return null;
     let data = null; try { data = await res.json(); } catch (e) {}
     if (!res.ok) {
       let msg = (data && data.message) || ("שגיאה " + res.status);
-      if (password && data && SERVER_ERRORS[data.code]) msg = SERVER_ERRORS[data.code];
-      else if (res.status === 401) msg = "המפתח לא תקין או שפג תוקפו. התחברו מחדש עם מפתח חדש.";
+      if (res.status === 401) msg = "המפתח לא תקין או שפג תוקפו. התחברו מחדש עם מפתח חדש.";
       if (res.status === 403 && /rate limit/i.test(msg)) msg = "GitHub ביקש להאט. נסו שוב בעוד כמה דקות.";
       else if (res.status === 403 && /not accessible/i.test(msg)) msg = NO_WRITE;
       throw Object.assign(new Error(msg), { status: res.status, data });
@@ -620,51 +592,39 @@ body.dragging .overlay{display:grid}
 
   // ------------------------------------------------------------------ connect
   // GitHub's token page starts with "Public repositories" and no Contents permission, so check exactly what the key can do
-  // cred is { password } (through the key server) or { token } (straight to GitHub)
-  async function connect(cred, remember) {
-    password = cred.password || "";
-    token = password ? "" : cred.token.replace(/^(bearer|token)\s+/i, "").trim();
-    if (!password && /\s/.test(token)) throw new Error("נראה שהודבק יותר מהמפתח עצמו. העתיקו שוב רק את המפתח (מתחיל ב-github_pat_).");
-    // with the password, a key problem is in the key stored on the server, so say where to replace it
-    const keyProblem = msg => new Error(password ? `יש בעיה במפתח של GitHub ששמור בשרת: ${msg} אחר כך שימו את המפתח החדש בהגדרות של Netlify.` : msg);
-    const notSelected = repos => keyProblem(`המפתח לא פותח את המאגר ${repos.map(en).join(" ואת ")}. צרו מפתח חדש, וב-${en("Repository access")} סמנו ${en("Only select repositories")}, לחצו ${en("Select repositories")} ובחרו את ${en(CFG.siteRepo)} ואת ${en(CFG.dataRepo)}.`);
+  async function connect(t, remember) {
+    token = t.replace(/^(bearer|token)\s+/i, "").trim();
+    if (/\s/.test(token)) throw new Error("נראה שהודבק יותר מהמפתח עצמו. העתיקו שוב רק את המפתח (מתחיל ב-github_pat_).");
+    const notSelected = repos => `המפתח לא פותח את המאגר ${repos.map(en).join(" ואת ")}. צרו מפתח חדש, וב-${en("Repository access")} סמנו ${en("Only select repositories")}, לחצו ${en("Select repositories")} ובחרו את ${en(CFG.siteRepo)} ואת ${en(CFG.dataRepo)}.`;
     const canRead = repo => gh(repoPath(repo)).then(() => true, e => { if (e.status === 404) return false; throw e; });
     const reads = await Promise.all([CFG.siteRepo, CFG.dataRepo].map(canRead));
-    if (!reads[1]) throw notSelected(reads[0] ? [CFG.dataRepo] : [CFG.siteRepo, CFG.dataRepo]);
+    if (!reads[1]) throw new Error(notSelected(reads[0] ? [CFG.dataRepo] : [CFG.siteRepo, CFG.dataRepo]));
     // an empty blob is harmless (every repo already has it) and needs the same permission as an upload
     const canWrite = repo => gh(repoPath(repo) + "/git/blobs", { method: "POST", body: JSON.stringify({ content: "", encoding: "utf-8" }) })
-      .then(() => true, e => { if (e.status === 403 && !(e.data && e.data.code) || e.status === 404) return false; throw e; });
+      .then(() => true, e => { if (e.status === 403 || e.status === 404) return false; throw e; });
     const writes = await Promise.all([CFG.siteRepo, CFG.dataRepo].map(canWrite));
-    if (!writes[0] && !writes[1]) throw keyProblem(NO_WRITE);
-    if (!writes[0]) throw notSelected([CFG.siteRepo]);
-    if (!writes[1]) throw notSelected([CFG.dataRepo]);
+    if (!writes[0] && !writes[1]) throw new Error(NO_WRITE);
+    if (!writes[0]) throw new Error(notSelected([CFG.siteRepo]));
+    if (!writes[1]) throw new Error(notSelected([CFG.dataRepo]));
     lib = await loadLibrary();
-    const [keep, drop] = password ? [PASS_KEY, TOKEN_KEY] : [TOKEN_KEY, PASS_KEY];
     try {
-      for (const s of [localStorage, sessionStorage]) s.removeItem(drop);
-      (remember ? localStorage : sessionStorage).setItem(keep, password || token);
-      (remember ? sessionStorage : localStorage).removeItem(keep);
+      (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
+      (remember ? sessionStorage : localStorage).removeItem(TOKEN_KEY);
     } catch (e) {}
   }
-  function storedCred() {
-    const get = k => { try { return localStorage.getItem(k) || sessionStorage.getItem(k) || ""; } catch (e) { return ""; } };
-    const p = get(PASS_KEY), t = get(TOKEN_KEY);
-    return p ? { password: p } : t ? { token: t } : null;
-  }
-  function remembered() {
-    try { return !!(localStorage.getItem(PASS_KEY) || localStorage.getItem(TOKEN_KEY)); } catch (e) { return false; }
+  function storedToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; }
   }
   function forgetToken() {
-    try { for (const s of [localStorage, sessionStorage]) { s.removeItem(TOKEN_KEY); s.removeItem(PASS_KEY); } } catch (e) {}
-    token = ""; password = ""; lib = null;
+    try { localStorage.removeItem(TOKEN_KEY); sessionStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    token = ""; lib = null;
   }
   function showConnect(msg) {
     $("app").hidden = true; $("connectPanel").hidden = false; $("logout").hidden = true;
     $("banners").innerHTML = (msg ? `<div class="banner err">${ICONS.warn}<div>${esc(msg)}</div></div>` : "")
       + (SHARED_ARRIVED && SHARED_ARRIVED !== "error" && SHARED_ARRIVED !== "0" ? `<div class="banner ok">${ICONS.ok}<div>ההקלטה התקבלה ונשמרה. התחברו, ואז תבחרו לאיזה שיר היא שייכת.</div></div>` : "");
-    const input = $("byKey").open ? $("tokenInput") : $("passInput");
-    input.focus();
-    input.select(); // a new try replaces what did not work
+    $("tokenInput").focus();
+    $("tokenInput").select(); // a new paste replaces the key that did not work
   }
   function showApp() {
     $("connectPanel").hidden = true; $("app").hidden = false; $("logout").hidden = false;
@@ -681,24 +641,17 @@ body.dragging .overlay{display:grid}
   $("repo2").textContent = CFG.dataRepo;
   $("siteLink").href = CFG.siteUrl;
 
-  async function signIn(cred, input, btn, label) {
-    btn.disabled = true; btn.textContent = "מתחבר...";
-    try { await connect(cred, $("remember").checked); input.value = ""; showApp(); toast("מחובר! אפשר להוסיף שירים"); }
-    catch (err) { forgetToken(); showConnect(err.message); }
-    finally { btn.disabled = false; btn.textContent = label; }
-  }
-  $("passForm").addEventListener("submit", e => {
-    e.preventDefault();
-    const p = $("passInput").value; // spaces are part of a password, so it is not trimmed
-    if (p) signIn({ password: p }, $("passInput"), $("passBtn"), "כניסה");
-  });
-  $("tokenForm").addEventListener("submit", e => {
+  $("tokenForm").addEventListener("submit", async e => {
     e.preventDefault();
     const t = $("tokenInput").value.trim();
-    if (t) signIn({ token: t }, $("tokenInput"), $("tokenBtn"), "התחברות");
+    if (!t) return;
+    const btn = $("tokenBtn"); btn.disabled = true; btn.textContent = "מתחבר...";
+    try { await connect(t, $("remember").checked); $("tokenInput").value = ""; showApp(); toast("מחובר! אפשר להוסיף שירים"); }
+    catch (err) { forgetToken(); showConnect(err.message); }
+    finally { btn.disabled = false; btn.textContent = "התחברות"; }
   });
   $("logout").addEventListener("click", () => {
-    if (!confirm("להתנתק? תצטרכו להתחבר שוב כדי לנהל את השירים במכשיר הזה.")) return;
+    if (!confirm("להתנתק? תצטרכו להדביק את המפתח שוב כדי לנהל את השירים במכשיר הזה.")) return;
     forgetToken(); stopPreview(); pending = []; showConnect();
   });
 
@@ -1479,14 +1432,12 @@ ${pages.join("\n")}
 
   // ------------------------------------------------------------------ start
   (async () => {
-    const cred = storedCred();
-    if (!cred) return showConnect();
-    if (cred.token) $("byKey").open = true;
-    try { await connect(cred, remembered()); showApp(); }
+    const t = storedToken();
+    if (!t) return showConnect();
+    try { await connect(t, !!(() => { try { return localStorage.getItem(TOKEN_KEY); } catch (e) { return ""; } })()); showApp(); }
     catch (e) {
-      // a wrong password or a dead key is forgotten; anything else (no internet, server not set up) keeps it for the next try
       if (e.status === 401 || e.status === 404) { forgetToken(); return showConnect(e.message); }
-      showConnect(e.message);
+      token = t; showConnect(e.message);
     }
   })();
 })();

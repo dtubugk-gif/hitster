@@ -110,8 +110,28 @@ body.dragging .overlay{display:grid}
 .badge.work{background:transparent;color:var(--muted);border:1.5px dashed var(--line-2);font-size:12px;font-weight:700}
 .play{width:36px;height:36px;border-radius:50%;border:1px solid var(--line-2);background:var(--surface);display:grid;place-items:center;cursor:pointer}
 .play svg{width:16px;height:16px;fill:var(--ink)}
-.song.playing .play{background:var(--teal);border-color:var(--teal)}
-.song.playing .play svg{fill:#fff}
+.play.on{background:var(--teal);border-color:var(--teal)}
+.play.on svg{fill:#fff}
+.play.sm{width:32px;height:32px;flex:none}
+.play.sm svg{width:14px;height:14px}
+.btn.sm{min-height:34px;padding:5px 11px;font-size:13.5px;border-radius:10px;gap:6px}
+.btn.sm svg{width:16px;height:16px}
+/* "our performance": the second recording every song needs */
+.song .ours{grid-column:3 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:5px 6px 5px 10px;border-radius:12px;
+  background:var(--surface-2);border:1px dashed var(--line-2);min-height:44px;min-width:0}
+.ours.ready{border-style:solid;border-color:color-mix(in srgb, var(--teal) 30%, transparent);background:color-mix(in srgb, var(--teal-soft) 70%, var(--surface))}
+.ours.none{border-color:color-mix(in srgb, var(--amber) 55%, transparent);background:color-mix(in srgb, var(--amber-soft) 55%, var(--surface))}
+.ours.recording{border-style:solid;border-color:var(--danger);background:var(--danger-soft)}
+.ours .o-label{font-size:12.5px;font-weight:750;color:var(--muted);flex:none;padding-left:2px}
+.ours .o-text{font-size:13.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 60px}
+.ours .need{color:color-mix(in srgb, var(--amber) 80%, var(--ink));font-weight:650}
+.ours .err{color:var(--danger);font-weight:600;white-space:normal}
+.ours .o-tools{display:flex;gap:2px;flex:none}
+.ours .o-tools .icon-btn{width:32px;height:32px}
+.rec-dot{width:11px;height:11px;border-radius:50%;background:var(--danger);flex:none;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.2}}
+.rec-time{font-weight:750;font-variant-numeric:tabular-nums;color:var(--danger)}
+.ours.drop-on{outline:3px solid var(--teal);outline-offset:1px}
 .field{min-width:0}
 .field input{width:100%;border:1px solid transparent;background:transparent;border-radius:9px;padding:6px 9px;min-height:36px}
 .field input:hover{border-color:var(--line)}
@@ -148,7 +168,8 @@ body.dragging .overlay{display:grid}
 @media (max-width: 820px){
   .wrap{padding:16px 12px 50px}
   .songs-head{display:none}
-  .song{grid-template-columns:46px 92px 1fr;grid-template-areas:"num title title" "play artist artist" ". year acts";row-gap:4px;padding:10px}
+  .song{grid-template-columns:46px 92px 1fr;grid-template-areas:"num title title" "play artist artist" ". year acts" "ours ours ours";row-gap:4px;padding:10px}
+  .song .ours{grid-area:ours;margin-top:4px}
   .song .badge{grid-area:num}.song .play{grid-area:play;justify-self:center}.song .f-title{grid-area:title}.song .f-artist{grid-area:artist}.song .year{grid-area:year}.song .acts{grid-area:acts;align-self:start}
 }
 </style>
@@ -206,7 +227,7 @@ body.dragging .overlay{display:grid}
         <div class="drop" id="drop" role="button" tabindex="0" aria-label="הוספת שירים">
           <div class="disc" aria-hidden="true"></div>
           <strong>גררו לכאן קבצי שירים או תיקייה שלמה</strong>
-          <span>MP3, M4A, WAV, FLAC ועוד. כל שיר מומר ל-MP3 נקי, בלי שם ובלי תמונה.</span>
+          <span>MP3, M4A, WAV, FLAC ועוד. כל שיר מומר ל-MP3 נקי, בלי שם ובלי תמונה. אחר כך מוסיפים לכל שיר גם את הביצוע שלנו.</span>
           <div class="row">
             <button class="btn" type="button" id="pickFiles"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM12 18a3 3 0 1 1 1-5.83V11h3v2h-2v2a3 3 0 0 1-2 3z"/></svg>בחירת קבצים</button>
             <button class="btn" type="button" id="pickFolder"><svg viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8z"/></svg>בחירת תיקייה</button>
@@ -214,6 +235,7 @@ body.dragging .overlay{display:grid}
         </div>
         <input type="file" id="fileInput" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.opus,.aac" hidden>
         <input type="file" id="folderInput" webkitdirectory multiple hidden>
+        <input type="file" id="oursInput" accept="audio/*,video/*,.mp3,.m4a,.wav,.flac,.ogg,.opus,.aac,.webm,.mp4" hidden>
         <div class="progress" id="prepProgress" hidden><span id="prepText"></span><div class="bar"><i id="prepBar"></i></div></div>
 
         <div class="pending-box" id="pendingBox" hidden>
@@ -224,7 +246,7 @@ body.dragging .overlay{display:grid}
               <svg viewBox="0 0 24 24"><path d="M11 16V7.8l-3.6 3.6L6 10l6-6 6 6-1.4 1.4L13 7.8V16zM5 18h14v2H5z"/></svg>
               <span id="uploadLabel">העלאה לאתר</span>
             </button>
-            <p>כל שיר יקבל מספר (הבא בתור), יעלה לאתר כקובץ ממוספר, ויקבל QR.</p>
+            <p>לכל שיר צריך גם את <b>הביצוע שלנו</b>: בוחרים קובץ או מקליטים כאן. בסריקה מתנגן קודם השיר המקורי ואחריו הביצוע שלנו.</p>
           </div>
           <div class="progress" id="upProgress" hidden><span id="upText"></span><div class="bar"><i id="upBar"></i></div></div>
         </div>
@@ -300,6 +322,10 @@ body.dragging .overlay{display:grid}
     del: '<svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z"/></svg>',
     warn: '<svg viewBox="0 0 24 24"><path d="M12 2 1 21h22zm-1 7h2v6h-2zm0 8h2v2h-2z"/></svg>',
     ok: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1.5 14.5-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4z"/></svg>',
+    mic: '<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>',
+    file: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 7V3.5L18.5 9zM12 18a3 3 0 1 1 1-5.83V11h3v2h-2v2a3 3 0 0 1-2 3z"/></svg>',
+    stop: '<svg viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg>',
+    x: '<svg viewBox="0 0 24 24"><path d="M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z"/></svg>',
   };
   const AUDIO_EXT = /\.(mp3|m4a|aac|wav|flac|ogg|oga|opus|webm|mp4|aiff?)$/i;
 
@@ -567,9 +593,10 @@ body.dragging .overlay{display:grid}
       : `<div class="badge" title="songs/${s.number}.mp3">${s.number}</div>`;
     const orig = isPending ? `${esc(s.name)}${s.duration ? " · " + fmtDur(s.duration) : ""}${s.state === "error" ? " · " + esc(s.error) : ""}`
                            : `${esc(s.original_name || "")}${s.duration ? " · " + fmtDur(s.duration) : ""}`;
-    return `<div class="song${previewId === id ? " playing" : ""}" data-id="${id}">
+    const playing = previewId === id || previewId === "o" + id;
+    return `<div class="song${playing ? " playing" : ""}" data-id="${id}">
       ${badge}
-      <button class="play" type="button" data-act="play" aria-label="השמעה"${isPending && s.state !== "ready" ? " disabled" : ""}>${previewId === id ? ICONS.pause : ICONS.play}</button>
+      <button class="play${previewId === id ? " on" : ""}" type="button" data-act="play" data-pid="${id}" aria-label="השמעת השיר המקורי"${isPending && s.state !== "ready" ? " disabled" : ""}>${previewId === id ? ICONS.pause : ICONS.play}</button>
       <div class="field f-title"><input class="t" data-f="title" value="${esc(s.title)}" placeholder="שם השיר" aria-label="שם השיר"><div class="orig"><bdi>${orig}</bdi></div></div>
       <div class="field f-artist"><input data-f="artist" value="${esc(s.artist)}" placeholder="זמר / להקה" aria-label="זמר"></div>
       <div class="field year${missing ? " missing" : ""}"><input data-f="year" value="${esc(s.year)}" placeholder="שנה?" inputmode="numeric" maxlength="4" aria-label="שנה"><span class="src">${s.year_source === "auto" ? "הצעה מהאינטרנט" : ""}</span></div>
@@ -578,23 +605,57 @@ body.dragging .overlay{display:grid}
         <button class="icon-btn" type="button" data-act="find" title="חיפוש שנה באינטרנט" aria-label="חיפוש שנה">${ICONS.find}</button>
         <button class="icon-btn danger" type="button" data-act="del" title="${isPending ? "הסרה מהרשימה" : "מחיקה מהמשחק"}" aria-label="הסרה">${ICONS.del}</button>
       </div>
+      ${isPending && s.state === "error" ? "" : oursHtml(s, isPending, id)}
     </div>`;
+  }
+
+  // every song also needs "our performance": a file, or a recording made right here
+  const oursJobs = {}; // songs already in the game: number -> {state, progress, error} while a performance is being added
+  function oursState(s, isPending) {
+    const id = isPending ? "p" + s.id : "n" + s.number;
+    if (rec && rec.id === id) return { state: "recording" };
+    if (isPending) return s.ours || { state: "none" };
+    return oursJobs[s.number] || (s.ours ? { state: "ready", name: s.ours.original_name, duration: s.ours.duration } : { state: "none" });
+  }
+  const hasOurs = p => !!(p.ours && p.ours.state === "ready");
+  function oursHtml(s, isPending, id) {
+    const o = oursState(s, isPending), pid = "o" + id;
+    const pickers = `<button class="btn sm" type="button" data-act="opick">${ICONS.file}בחירת קובץ</button><button class="btn sm" type="button" data-act="orec">${ICONS.mic}הקלטה</button>`;
+    let inner;
+    if (o.state === "recording")
+      inner = `<span class="rec-dot" aria-hidden="true"></span><span class="rec-time" dir="ltr">0:00</span><span class="o-text">מקליטים...</span>
+        <button class="btn sm teal" type="button" data-act="ostop">${ICONS.stop}סיום הקלטה</button><button class="link" type="button" data-act="ocancel">ביטול</button>`;
+    else if (o.state === "working")
+      inner = o.saving ? `<span class="o-text">שומר את הביצוע באתר...</span>`
+        : `<span class="o-text">מכין את הביצוע... <b class="o-pct">${Math.round((o.progress || 0) * 100)}%</b></span>`;
+    else if (o.state === "ready")
+      inner = `<button class="play sm${previewId === pid ? " on" : ""}" type="button" data-act="oplay" data-pid="${pid}" aria-label="השמעת הביצוע שלנו">${previewId === pid ? ICONS.pause : ICONS.play}</button>
+        <span class="o-text"><bdi>${esc(o.name || "הקלטה")}</bdi>${o.duration ? " · " + fmtDur(o.duration) : ""}</span>
+        <span class="o-tools"><button class="icon-btn" type="button" data-act="opick" title="החלפה בקובץ אחר" aria-label="החלפה בקובץ אחר">${ICONS.file}</button><button class="icon-btn" type="button" data-act="orec" title="הקלטה מחדש" aria-label="הקלטה מחדש">${ICONS.mic}</button>${isPending ? `<button class="icon-btn danger" type="button" data-act="oremove" title="הסרת הביצוע" aria-label="הסרת הביצוע">${ICONS.x}</button>` : ""}</span>`;
+    else
+      inner = (o.state === "error" ? `<span class="o-text err">${esc(o.error)}</span>` : `<span class="o-text need">${isPending ? "חובה להוסיף לפני ההעלאה" : "חסר ביצוע: הוסיפו אותו"}</span>`) + pickers;
+    return `<div class="ours ${o.state}"><span class="o-label">הביצוע שלנו</span>${inner}</div>`;
   }
 
   function renderPending() {
     $("pendingBox").hidden = pending.length === 0;
     $("pendingRows").innerHTML = pending.map(p => rowHtml(p, true)).join("");
-    const ready = pending.filter(p => p.state === "ready").length;
-    const working = pending.some(p => p.state === "queued" || p.state === "working");
-    $("uploadLabel").textContent = working ? "מכין שירים..." : `העלאה לאתר (${ready} שירים)`;
-    $("uploadBtn").disabled = busy || working || ready === 0;
+    const ready = pending.filter(p => p.state === "ready");
+    const noOurs = ready.filter(p => !hasOurs(p)).length;
+    const working = pending.some(p => p.state === "queued" || p.state === "working" || (p.ours && p.ours.state === "working")) || !!(rec && rec.id[0] === "p");
+    $("uploadLabel").textContent = rec && rec.id[0] === "p" ? "מקליטים את הביצוע..." : working ? "מכין שירים..."
+      : noOurs ? `חסר הביצוע שלנו ל־${noOurs === 1 ? "שיר אחד" : noOurs + " שירים"}`
+      : `העלאה לאתר (${ready.length === 1 ? "שיר אחד" : ready.length + " שירים"})`;
+    $("uploadBtn").disabled = busy || working || ready.length === 0 || noOurs > 0;
   }
 
   function renderLibrary() {
     const songs = [...lib.songs].sort((a, b) => a.number - b.number);
     $("rows").innerHTML = songs.map(s => rowHtml(s, false)).join("") || '<div class="empty-list">עוד אין שירים במשחק. הוסיפו שירים למעלה.</div>';
     const missing = songs.filter(s => !(s.year || "").trim()).length;
-    $("summary").innerHTML = `<b>${songs.length}</b> שירים` + (songs.length ? (missing ? ` · <span class="warn">${missing} בלי שנה</span>` : " · לכולם יש שנה ✓") : "");
+    const noOurs = songs.filter(s => !s.ours).length;
+    $("summary").innerHTML = (songs.length === 1 ? "<b>שיר אחד</b>" : `<b>${songs.length}</b> שירים`) +(songs.length ? (missing ? ` · <span class="warn">${missing} בלי שנה</span>` : " · לכולם יש שנה ✓")
+      + (noOurs ? ` · <span class="warn">${noOurs} בלי הביצוע שלנו</span>` : " · לכולם יש ביצוע ✓") : "");
     $("findAll").hidden = missing === 0;
     $("libMeta").innerHTML = `הקלפים מובילים אל <span dir="ltr">${esc(CFG.siteUrl)}</span>`;
   }
@@ -637,7 +698,7 @@ body.dragging .overlay{display:grid}
     }
   }
   window.addEventListener("beforeunload", e => {
-    if (Object.keys(edits).length || busy) { e.preventDefault(); e.returnValue = ""; }
+    if (Object.keys(edits).length || busy || rec || Object.values(oursJobs).some(j => j.state === "working")) { e.preventDefault(); e.returnValue = ""; }
   });
 
   function findItem(id) {
@@ -674,6 +735,17 @@ body.dragging .overlay{display:grid}
       }
       if (act === "find") return findYear(id, true).catch(err => toast(err.message, true));
       if (act === "del") return isP ? removePending(item) : deleteSong(item);
+      if (act === "oplay") return togglePreview("o" + id, isP ? item.ours.url
+        : CFG.siteUrl + "songs/" + item.number + "-b.mp3?v=" + encodeURIComponent((item.ours && item.ours.sha1) || ""));
+      if (act === "opick") { oursTarget = id; $("oursInput").click(); return; }
+      if (act === "orec") return startRecording(id);
+      if (act === "ostop") return stopRecording(false);
+      if (act === "ocancel") return stopRecording(true);
+      if (act === "oremove") {
+        if (previewId === "o" + id) stopPreview();
+        if (item.ours && item.ours.url) URL.revokeObjectURL(item.ours.url);
+        item.ours = null; renderPending();
+      }
     });
   }
 
@@ -727,8 +799,10 @@ body.dragging .overlay{display:grid}
     if (!confirm(`למחוק את "${s.title || ("שיר " + s.number)}" מהמשחק?\nקלף מספר ${s.number} יפסיק לעבוד.`)) return;
     busy = true; setSaved("מוחק...", true);
     try {
-      if (previewId === "n" + s.number) stopPreview();
-      await commitSite([{ path: `songs/${s.number}.mp3`, sha: null }], `מחיקת שיר ${s.number}`).catch(e => {
+      if (previewId === "n" + s.number || previewId === "on" + s.number) stopPreview();
+      const files = [{ path: `songs/${s.number}.mp3`, sha: null }];
+      if (s.ours) files.push({ path: `songs/${s.number}-b.mp3`, sha: null });
+      await commitSite(files, `מחיקת שיר ${s.number}`).catch(e => {
         if (e.status !== 422) throw e; // the file was never uploaded: nothing to delete
       });
       await saveLibrary(fresh => { fresh.songs = fresh.songs.filter(x => x.number !== s.number); }, `מחיקת שיר ${s.number}`);
@@ -739,30 +813,41 @@ body.dragging .overlay{display:grid}
 
   // ------------------------------------------------------------------ preview
   const preview = new Audio(); let previewId = null;
+  // preview ids: "p3"/"n5" play a song, "op3"/"on5" play its performance
+  const previewBtn = id => document.querySelector(`[data-pid="${id}"]`);
   function stopPreview() {
     preview.pause(); const old = previewId; previewId = null;
-    const row = old && document.querySelector(`.song[data-id="${old}"]`);
-    if (row) { row.classList.remove("playing"); row.querySelector(".play").innerHTML = ICONS.play; }
+    const btn = old && previewBtn(old);
+    if (btn) { btn.classList.remove("on"); btn.innerHTML = ICONS.play; btn.closest(".song").classList.remove("playing"); }
   }
   function togglePreview(id, url) {
     if (previewId === id) return stopPreview();
     stopPreview();
     previewId = id; preview.src = url;
-    preview.play().catch(() => { toast(id[0] === "n" ? "השיר עוד לא זמין באתר (אחרי העלאה זה לוקח כדקה)" : "לא הצלחתי להשמיע את הקובץ", true); stopPreview(); });
-    const row = document.querySelector(`.song[data-id="${id}"]`);
-    if (row) { row.classList.add("playing"); row.querySelector(".play").innerHTML = ICONS.pause; }
+    preview.play().catch(() => {
+      if (previewId !== id) return;
+      toast(/^o?n/.test(id) ? "הקובץ עוד לא זמין באתר (אחרי העלאה זה לוקח כדקה)" : "לא הצלחתי להשמיע את הקובץ", true);
+      stopPreview();
+    });
+    const btn = previewBtn(id);
+    if (btn) { btn.classList.add("on"); btn.innerHTML = ICONS.pause; btn.closest(".song").classList.add("playing"); }
   }
   preview.addEventListener("ended", stopPreview);
 
   // ------------------------------------------------------------------ add songs
   let nextPendingId = 1, worker = null, preparing = false;
+  // one encoder, one job at a time (songs and performances can be added together)
+  let encodeChain = Promise.resolve();
   function encodeMp3(left, right, sampleRate, onProgress) {
-    if (!worker) worker = new Worker("encoder.js");
-    return new Promise((res, rej) => {
+    const run = () => new Promise((res, rej) => {
+      if (!worker) worker = new Worker("encoder.js");
       worker.onmessage = e => { if (e.data.done) res(e.data.done); else onProgress(e.data.progress); };
       worker.onerror = e => { worker.terminate(); worker = null; rej(new Error("קידוד נכשל")); };
       worker.postMessage({ left, right, sampleRate, kbps: 160 }, [left.buffer, right.buffer]);
     });
+    const job = encodeChain.then(run, run);
+    encodeChain = job.catch(() => {});
+    return job;
   }
   // A real MP3 only needs its tags cut off (ID3v2 at the start, APE/ID3v1 at the end): instant and lossless.
   // Returns null when the file is not a plain MP3 stream (e.g. an MP4 renamed to .mp3) so it gets re-encoded.
@@ -794,20 +879,13 @@ body.dragging .overlay{display:grid}
     });
   }
 
-  async function prepare(p) {
-    p.state = "working"; renderPending();
-    const buf = await p.file.arrayBuffer();
-    p.sha1 = await sha1(buf);
-    const known = lib.songs.find(s => s.sha1 === p.sha1) || pending.find(o => o !== p && o.sha1 === p.sha1 && o.state !== "error");
-    if (known) throw Object.assign(new Error("השיר כבר ברשימה"), { duplicate: known.number || known.title || true });
-    const plain = /\.mp3$/i.test(p.name) ? stripMp3(buf) : null;
+  // any audio (or video) file -> a clean MP3 with no tags: {blob, url, duration}
+  async function toMp3(buf, name, onProgress) {
+    const plain = /\.mp3$/i.test(name) ? stripMp3(buf) : null;
     if (plain) {
       const url = URL.createObjectURL(plain);
       const d = await mediaDuration(url);
-      if (d >= 0) { // the browser can play it, so it is good to go as-is
-        p.blob = plain; p.url = url; p.duration = d; p.file = null; p.state = "ready";
-        return;
-      }
+      if (d >= 0) return { blob: plain, url, duration: d }; // the browser can play it, so it is good to go as-is
       URL.revokeObjectURL(url);
     }
     let audio;
@@ -815,18 +893,129 @@ body.dragging .overlay{display:grid}
       const ctx = new OfflineAudioContext(2, 44100, 44100); // decodes and resamples to 44.1 kHz
       audio = await ctx.decodeAudioData(buf);
     } catch (e) { throw new Error("הדפדפן לא הצליח לקרוא את הקובץ כשיר"); }
-    p.duration = audio.duration;
     const left = new Float32Array(audio.getChannelData(0));
     const right = audio.numberOfChannels > 1 ? new Float32Array(audio.getChannelData(1)) : new Float32Array(left);
-    p.blob = await encodeMp3(left, right, audio.sampleRate, prog => {
+    const blob = await encodeMp3(left, right, audio.sampleRate, onProgress);
+    return { blob, url: URL.createObjectURL(blob), duration: audio.duration };
+  }
+
+  async function prepare(p) {
+    p.state = "working"; renderPending();
+    const buf = await p.file.arrayBuffer();
+    p.sha1 = await sha1(buf);
+    const known = lib.songs.find(s => s.sha1 === p.sha1) || pending.find(o => o !== p && o.sha1 === p.sha1 && o.state !== "error");
+    if (known) throw Object.assign(new Error("השיר כבר ברשימה"), { duplicate: known.number || known.title || true });
+    const out = await toMp3(buf, p.name, prog => {
       p.progress = prog;
       const badge = document.querySelector(`.song[data-id="p${p.id}"] .badge`);
       if (badge) badge.textContent = Math.round(prog * 100) + "%";
     });
-    p.url = URL.createObjectURL(p.blob);
+    Object.assign(p, out);
     p.file = null; // free the original
     p.state = "ready";
   }
+
+  // ------------------------------------------------------------------ our performance
+  let oursTarget = null, rec = null;
+  const rerenderRow = id => id[0] === "p" ? renderPending() : renderLibrary();
+  const isMedia = f => AUDIO_EXT.test(f.name || "") || /^(audio|video)\//.test(f.type || "");
+
+  async function addOurs(id, file, name) {
+    const { pending: isP, item } = findItem(id); if (!item) return;
+    const job = { state: "working", progress: 0 };
+    if (previewId === "o" + id) stopPreview();
+    if (isP) { if (item.ours && item.ours.url) URL.revokeObjectURL(item.ours.url); item.ours = job; }
+    else oursJobs[item.number] = job;
+    rerenderRow(id);
+    try {
+      const buf = await file.arrayBuffer();
+      const hash = await sha1(buf);
+      if (hash === item.sha1) throw new Error("זה אותו קובץ כמו השיר המקורי. כאן צריך את הביצוע שלנו.");
+      if (pending.some(o => o.sha1 === hash) || lib.songs.some(o => o.sha1 === hash))
+        throw new Error("זה הקובץ של אחד השירים המקוריים. כאן צריך את הביצוע שלנו.");
+      const out = await toMp3(buf, name, prog => {
+        job.progress = prog;
+        const el = document.querySelector(`.song[data-id="${id}"] .o-pct`);
+        if (el) el.textContent = Math.round(prog * 100) + "%";
+      });
+      if (isP) {
+        if (item.ours !== job) return URL.revokeObjectURL(out.url); // replaced or removed in the meantime
+        item.ours = { state: "ready", blob: out.blob, url: out.url, duration: out.duration, name, sha1: hash };
+      } else {
+        URL.revokeObjectURL(out.url);
+        job.progress = 0; job.saving = true; rerenderRow(id);
+        await uploadOurs(item, out.blob, { original_name: name, duration: Math.round(out.duration), sha1: hash });
+        if (oursJobs[item.number] === job) delete oursJobs[item.number];
+        toast(`הביצוע של שיר ${item.number} נשמר. הוא יעבוד באתר תוך דקה בערך.`);
+      }
+    } catch (e) {
+      if (isP && item.ours !== job) return;
+      Object.assign(job, { state: "error", error: e.message });
+      if (!isP) setSaved("");
+    } finally {
+      rerenderRow(id);
+    }
+  }
+  async function uploadOurs(s, blob, info) {
+    setSaved("שומר את הביצוע...", true);
+    const b = await gh(repoPath(CFG.siteRepo) + "/git/blobs", { method: "POST", body: JSON.stringify({ content: await blobToB64(blob), encoding: "base64" }) });
+    await commitSite([{ path: `songs/${s.number}-b.mp3`, sha: b.sha }], `ביצוע לשיר ${s.number}`);
+    await saveLibrary(f => {
+      const x = f.songs.find(y => y.number === s.number);
+      if (x) x.ours = { ...info, added: new Date().toISOString() };
+    }, `ביצוע לשיר ${s.number}`);
+    setSaved("נשמר ✓");
+  }
+
+  const clock = t => Math.floor(t / 60) + ":" + String(Math.floor(t % 60)).padStart(2, "0");
+  async function startRecording(id) {
+    if (rec) return toast("כבר מקליטים. סיימו קודם את ההקלטה הפתוחה.", true);
+    if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) || !window.MediaRecorder)
+      return toast("הדפדפן הזה לא יכול להקליט. אפשר לבחור קובץ הקלטה במקום.", true);
+    stopPreview();
+    let stream;
+    try {
+      // no voice "cleanup": it squashes singing and music
+      stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
+    } catch (e) {
+      return toast(e && e.name === "NotAllowedError" ? "אין גישה למיקרופון. אשרו לאתר להשתמש במיקרופון (ליד הכתובת) ונסו שוב." : "לא הצלחתי לפתוח את המיקרופון.", true);
+    }
+    if (rec || !findItem(id).item) { stream.getTracks().forEach(t => t.stop()); return; }
+    const type = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"].find(t => MediaRecorder.isTypeSupported(t)) || "";
+    let recorder;
+    try { recorder = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 160000 } : undefined); }
+    catch (e) { stream.getTracks().forEach(t => t.stop()); return toast("לא הצלחתי להתחיל להקליט.", true); }
+    const r = rec = { id, recorder, chunks: [], start: Date.now(), cancelled: false };
+    recorder.ondataavailable = e => { if (e.data && e.data.size) r.chunks.push(e.data); };
+    recorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      clearInterval(r.timer);
+      if (rec === r) rec = null;
+      const secs = (Date.now() - r.start) / 1000;
+      if (r.cancelled || !r.chunks.length || !findItem(id).item) return rerenderRow(id);
+      if (secs < 2) { toast("ההקלטה קצרה מדי. נסו שוב.", true); return rerenderRow(id); }
+      const blob = new Blob(r.chunks, { type: recorder.mimeType || type || "audio/webm" });
+      addOurs(id, blob, `הקלטה מ־${new Date().toLocaleDateString("he-IL")}`);
+    };
+    recorder.start(1000);
+    r.timer = setInterval(() => {
+      const el = document.querySelector(`.song[data-id="${id}"] .rec-time`);
+      if (el) el.textContent = clock((Date.now() - r.start) / 1000);
+    }, 250);
+    rerenderRow(id);
+  }
+  function stopRecording(cancel) {
+    if (!rec) return;
+    rec.cancelled = cancel;
+    if (rec.recorder.state !== "inactive") rec.recorder.stop();
+  }
+  $("oursInput").addEventListener("change", e => {
+    const f = e.target.files[0]; e.target.value = "";
+    const id = oursTarget; oursTarget = null;
+    if (!f || !id) return;
+    if (!isMedia(f)) return toast("זה לא נראה כמו קובץ שמע. בחרו קובץ הקלטה או שיר.", true);
+    addOurs(id, f, f.name);
+  });
   async function runQueue() {
     if (preparing) return;
     preparing = true;
@@ -858,8 +1047,10 @@ body.dragging .overlay{display:grid}
     runQueue();
   }
   function removePending(p) {
-    if (previewId === "p" + p.id) stopPreview();
+    if (previewId === "p" + p.id || previewId === "op" + p.id) stopPreview();
+    if (rec && rec.id === "p" + p.id) stopRecording(true);
     if (p.url) URL.revokeObjectURL(p.url);
+    if (p.ours && p.ours.url) URL.revokeObjectURL(p.ours.url);
     pending = pending.filter(x => x !== p);
     renderPending();
   }
@@ -890,17 +1081,31 @@ body.dragging .overlay{display:grid}
   let dragDepth = 0;
   window.addEventListener("dragenter", e => { if (!$("app").hidden && [...e.dataTransfer.types].includes("Files")) { dragDepth++; document.body.classList.add("dragging"); } });
   window.addEventListener("dragleave", () => { dragDepth = Math.max(0, dragDepth - 1); if (!dragDepth) document.body.classList.remove("dragging"); });
-  window.addEventListener("dragover", e => e.preventDefault());
+  let dropStrip = null; // the "our performance" strip under the pointer while dragging
+  window.addEventListener("dragover", e => {
+    e.preventDefault();
+    const strip = e.target.closest && e.target.closest(".ours");
+    if (strip !== dropStrip) { if (dropStrip) dropStrip.classList.remove("drop-on"); dropStrip = strip; if (strip) strip.classList.add("drop-on"); }
+  });
   window.addEventListener("drop", async e => {
     e.preventDefault(); dragDepth = 0; document.body.classList.remove("dragging");
-    if (!$("app").hidden) addFiles(await filesFromDrop(e.dataTransfer));
+    if (dropStrip) dropStrip.classList.remove("drop-on");
+    const strip = dropStrip; dropStrip = null;
+    if ($("app").hidden) return;
+    const files = await filesFromDrop(e.dataTransfer);
+    if (strip && !strip.classList.contains("recording") && !strip.classList.contains("working")) { // dropped on "our performance"
+      const f = files.find(isMedia);
+      if (!f) return toast("זה לא נראה כמו קובץ שמע.", true);
+      return addOurs(strip.closest(".song").dataset.id, f, f.name);
+    }
+    addFiles(files);
   });
 
   // ------------------------------------------------------------------ upload
   $("uploadBtn").addEventListener("click", async () => {
     if (busy) return;
     const ready = pending.filter(p => p.state === "ready");
-    if (!ready.length) return;
+    if (!ready.length || ready.some(p => !hasOurs(p))) return;
     const noYear = ready.filter(p => !(p.year || "").trim()).length;
     if (noYear && !confirm(`ל־${noYear} שירים אין שנה. אפשר להעלות עכשיו ולהוסיף שנה אחר כך. להמשיך?`)) return;
     busy = true; renderPending();
@@ -911,17 +1116,19 @@ body.dragging .overlay{display:grid}
       const fresh = await loadLibrary();
       let next = fresh.next_number;
       ready.forEach(p => { p.number = next++; });
-      // 1. upload the mp3 files (one blob each), then a single commit for all of them
+      // 1. upload the mp3 files (the song and our performance, one blob each), then a single commit for all of them
       const entries = [];
+      const putBlob = async b => (await gh(repoPath(CFG.siteRepo) + "/git/blobs", {
+        method: "POST", body: JSON.stringify({ content: await blobToB64(b), encoding: "base64" }),
+      })).sha;
       for (let i = 0; i < ready.length; i++) {
         const p = ready[i];
         $("upText").textContent = `מעלה ${i + 1} מתוך ${ready.length}: ${p.title || p.name}`;
         $("upBar").style.width = (i / ready.length * 90) + "%";
         label.textContent = `מעלה ${i + 1}/${ready.length}...`;
-        const blob = await gh(repoPath(CFG.siteRepo) + "/git/blobs", {
-          method: "POST", body: JSON.stringify({ content: await blobToB64(p.blob), encoding: "base64" }),
-        });
-        entries.push({ path: `songs/${p.number}.mp3`, sha: blob.sha });
+        entries.push({ path: `songs/${p.number}.mp3`, sha: await putBlob(p.blob) });
+        $("upBar").style.width = ((i + 0.5) / ready.length * 90) + "%";
+        entries.push({ path: `songs/${p.number}-b.mp3`, sha: await putBlob(p.ours.blob) });
       }
       $("upText").textContent = "שומר באתר..."; $("upBar").style.width = "93%";
       await commitSite(entries, ready.length === 1 ? `שיר ${ready[0].number}` : `שירים ${ready[0].number}-${ready[ready.length - 1].number}`);
@@ -932,11 +1139,15 @@ body.dragging .overlay{display:grid}
         for (const p of ready) {
           f.songs = f.songs.filter(s => s.number !== p.number);
           f.songs.push({ number: p.number, title: p.title, artist: p.artist, year: p.year, year_source: p.year_source || "",
-                         original_name: p.name, duration: Math.round(p.duration || 0), sha1: p.sha1, added: new Date().toISOString() });
+                         original_name: p.name, duration: Math.round(p.duration || 0), sha1: p.sha1, added: new Date().toISOString(),
+                         ours: { original_name: p.ours.name, duration: Math.round(p.ours.duration || 0), sha1: p.ours.sha1, added: new Date().toISOString() } });
         }
       }, `הוספת ${ready.length} שירים`);
       $("upBar").style.width = "100%";
-      for (const p of ready) { if (previewId === "p" + p.id) stopPreview(); URL.revokeObjectURL(p.url); }
+      for (const p of ready) {
+        if (previewId === "p" + p.id || previewId === "op" + p.id) stopPreview();
+        URL.revokeObjectURL(p.url); URL.revokeObjectURL(p.ours.url);
+      }
       pending = pending.filter(p => !ready.includes(p));
       renderAll();
       const what = ready.length === 1 ? `השיר הועלה (מספר ${ready[0].number}). הוא יעבוד` : `הועלו ${ready.length} שירים (מספרים ${ready[0].number}–${ready[ready.length - 1].number}). הם יעבדו`;

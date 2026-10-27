@@ -117,6 +117,14 @@ main{flex:1;width:100%;max-width:440px;display:flex;flex-direction:column;align-
 .controls #restart{flex:0 1 auto}
 .controls #back10,.controls #fwd10{min-width:78px;font-variant-numeric:tabular-nums}
 
+/* the original song, then our own performance of it */
+.parts{display:flex;gap:4px;width:100%;max-width:330px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.parts button{flex:1;font:inherit;font-size:14.5px;font-weight:650;color:var(--muted);background:transparent;border:0;border-radius:12px;
+  min-height:42px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .2s, color .2s}
+.parts button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.parts button:focus-visible{outline:3px solid var(--teal);outline-offset:2px}
+.parts svg{width:16px;height:16px;fill:currentColor;flex:none}
+
 details.rules{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:4px 16px}
 details.rules summary{cursor:pointer;font-weight:700;padding:12px 0;list-style:none;display:flex;justify-content:space-between;align-items:center}
 details.rules summary::-webkit-details-marker{display:none}
@@ -180,6 +188,11 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     <p id="sub">הקישו על התקליט כדי לשמוע את השיר</p>
   </div>
 
+  <div class="parts" id="parts" role="group" aria-label="מה לשמוע" hidden>
+    <button type="button" data-part="orig" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg>השיר המקורי</button>
+    <button type="button" data-part="ours" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>הביצוע שלנו</button>
+  </div>
+
   <div class="controls" id="controls" hidden>
     <button class="btn" id="back10" type="button" aria-label="10 שניות אחורה"><svg viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6zm9 0V6l-8.5 6z"/></svg>10</button>
     <button class="btn" id="restart" type="button"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>מההתחלה</button>
@@ -196,7 +209,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     <summary>איך משחקים?</summary>
     <ol>
       <li>כל שחקן מקבל קלף אחד הפוך עם השנה למעלה: זו תחילת ציר הזמן שלו.</li>
-      <li>בתור שלכם, לוחצים על <b>סריקת קלף</b>, מכוונים את המצלמה לקלף חדש ומקשיבים לשיר בלי להציץ בגב.</li>
+      <li>בתור שלכם, לוחצים על <b>סריקת קלף</b>, מכוונים את המצלמה לקלף חדש ומקשיבים לשיר בלי להציץ בגב. אחרי השיר המקורי מתנגן גם <b>הביצוע שלנו</b>.</li>
       <li>מניחים את הקלף בציר הזמן איפה שחושבים שהשיר נמצא: לפני, אחרי או בין הקלפים שכבר יש לכם.</li>
       <li>הופכים את הקלף. צדקתם? הקלף נשאר אצלכם. טעיתם? הוא יוצא מהמשחק.</li>
       <li>בונוס: מי שמנחש גם את הזמר ואת שם השיר מקבל אסימון.</li>
@@ -232,6 +245,37 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   // in-site scanning needs the camera, which browsers only allow on https (or this computer)
   const canScan = window.isSecureContext && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   let number = null, started = false, silent = false, unlocked = false;
+  // every card has the original song (N.mp3) and our own performance of it (N-b.mp3), played in that order
+  let part = "orig", hasOurs = false, nextTimer = 0;
+  const src = () => "songs/" + number + (part === "ours" ? "-b" : "") + ".mp3";
+  const PART_TEXT = {
+    orig: ["מי שר? ובאיזו שנה?", "מקמו את הקלף בציר הזמן, ורק אז הפכו אותו"],
+    ours: ["הביצוע שלנו", "אותו שיר, בביצוע שלנו"],
+  };
+  function renderParts() {
+    $("parts").hidden = !number || !hasOurs;
+    for (const b of $("parts").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.part === part));
+  }
+  async function checkOurs(n) {
+    let ok = false;
+    try { const r = await fetch("songs/" + n + "-b.mp3", { method: "HEAD", cache: "no-store" }); ok = r.ok; } catch (e) {}
+    if (number !== n) return; // another card was scanned meanwhile
+    hasOurs = ok; renderParts();
+  }
+  function playPart(p) {
+    clearTimeout(nextTimer);
+    if (!number) return;
+    part = p; started = false;
+    record.disabled = false; $("retry").hidden = true;
+    audio.src = src(); audio.load();
+    setRing(0); $("time").textContent = ""; setIcon(false);
+    renderParts();
+    body.classList.add("loading");
+    audio.play().catch(() => body.classList.remove("loading"));
+    if ("mediaSession" in navigator) {
+      try { navigator.mediaSession.metadata = new MediaMetadata({ title: p === "ours" ? "הביצוע שלנו" : "שיר מסתורי", artist: "קלפי שירים" }); } catch (e) {}
+    }
+  }
 
   function readNumber() {
     const raw = (location.hash.slice(1) || new URLSearchParams(location.search).get("c") || "").trim();
@@ -252,7 +296,8 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   }
 
   function welcome() {
-    number = null;
+    number = null; part = "orig"; hasOurs = false; clearTimeout(nextTimer);
+    renderParts();
     audio.removeAttribute("src"); audio.load();
     body.classList.remove("playing", "loading");
     $("chip").textContent = ""; document.title = "קלפי שירים";
@@ -268,6 +313,8 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
 
   function load(n) {
     number = n; started = false; silent = false;
+    part = "orig"; hasOurs = false; clearTimeout(nextTimer);
+    renderParts(); checkOurs(n);
     document.title = "קלף " + n + " · קלפי שירים";
     $("chip").textContent = "קלף " + n;
     $("rules").hidden = true; $("retry").hidden = true;
@@ -276,7 +323,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     body.classList.remove("playing"); setIcon(false); setRing(0);
     showScan("סריקת הקלף הבא");
     setText("מוכנים?", "הקישו על התקליט כדי לשמוע את השיר");
-    audio.src = "songs/" + n + ".mp3";
+    audio.src = src();
     audio.load();
     // after a scan the audio is already unlocked, so this starts the song right away;
     // when a card is opened with the phone camera instead, browsers usually wait for a tap
@@ -289,6 +336,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
 
   function toggle() {
     if (!number) { if (canScan) openScanner(); return; }
+    clearTimeout(nextTimer); // a tap while "our performance is next" replays this part instead
     if (audio.paused) {
       body.classList.add("loading");
       const p = audio.play();
@@ -303,8 +351,11 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     $("icon").innerHTML = ICON_ALERT; record.setAttribute("aria-label", "השיר לא נטען");
     $("controls").hidden = true; record.disabled = true;
     let missing = false;
-    try { const r = await fetch("songs/" + number + ".mp3", { method: "HEAD", cache: "no-store" }); missing = r.status === 404; } catch (e) {}
-    if (missing) {
+    try { const r = await fetch(src(), { method: "HEAD", cache: "no-store" }); missing = r.status === 404; } catch (e) {}
+    if (missing && part === "ours") {
+      setText("הביצוע שלנו לא נמצא", "אפשר לשמוע את השיר המקורי. את הביצוע מוסיפים בדף הניהול.");
+      $("retry").hidden = true;
+    } else if (missing) {
       setText("הקלף הזה לא נמצא", "אין שיר מספר " + number + " במשחק. אולי הקלפים הודפסו מגרסה ישנה, או שהשירים עוד לא הועלו לאתר?");
       $("retry").hidden = true;
     } else {
@@ -314,7 +365,12 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   }
 
   record.addEventListener("click", toggle);
-  $("retry").addEventListener("click", () => { record.disabled = false; load(number); });
+  $("retry").addEventListener("click", () => { record.disabled = false; part === "ours" ? playPart("ours") : load(number); });
+  $("parts").addEventListener("click", e => {
+    const b = e.target.closest("button[data-part]"); if (!b) return;
+    if (b.dataset.part === part && !record.disabled) { if (audio.paused) toggle(); return; }
+    playPart(b.dataset.part);
+  });
   $("restart").addEventListener("click", () => { audio.currentTime = 0; if (audio.paused) toggle(); });
   $("back10").addEventListener("click", () => { audio.currentTime = Math.max(0, audio.currentTime - 10); });
   $("fwd10").addEventListener("click", () => { if (isFinite(audio.duration)) audio.currentTime = Math.min(audio.duration - 0.5, audio.currentTime + 10); else audio.currentTime += 10; });
@@ -325,7 +381,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     started = true;
     body.classList.remove("loading"); body.classList.add("playing"); setIcon(true);
     $("controls").hidden = false;
-    setText("מי שר? ובאיזו שנה?", "מקמו את הקלף בציר הזמן, ורק אז הפכו אותו");
+    setText(...PART_TEXT[part]);
   });
   audio.addEventListener("waiting", () => { if (!silent) body.classList.add("loading"); });
   audio.addEventListener("pause", () => {
@@ -338,7 +394,12 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   audio.addEventListener("ended", () => {
     if (silent) return;
     setRing(1);
-    setText("השיר נגמר", "סרקו את הקלף הבא, או הקישו על התקליט כדי לשמוע שוב");
+    if (part === "orig" && hasOurs) { // the original is over: our performance comes next
+      setText("ועכשיו: הביצוע שלנו", "מתחיל עוד רגע...");
+      nextTimer = setTimeout(() => playPart("ours"), 1200);
+      return;
+    }
+    setText(part === "ours" ? "הביצוע נגמר" : "השיר נגמר", "סרקו את הקלף הבא, או הקישו על התקליט כדי לשמוע שוב");
   });
   audio.addEventListener("timeupdate", () => {
     if (!started || silent) return;
@@ -397,6 +458,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
 
   async function openScanner() {
     if (!canScan || scanning || !scanner.hidden) return;
+    clearTimeout(nextTimer);
     unlockAudio();
     scanner.hidden = false; scanner.classList.remove("found"); $("scanProblem").hidden = true;
     history.pushState({ scanner: true }, "", location.href); // the phone's Back button closes the camera
@@ -489,7 +551,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     if (!after && silent) {
       // cancelled: put the card that was loaded before back in place of the unlock clip
       silent = false;
-      if (number) { audio.src = "songs/" + number + ".mp3"; audio.load(); } else audio.removeAttribute("src");
+      if (number) { audio.src = src(); audio.load(); } else audio.removeAttribute("src");
     }
     if (history.state && history.state.scanner) {
       popClose = after || (() => {});

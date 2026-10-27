@@ -103,7 +103,7 @@ body.dragging .overlay{display:grid}
 .summary b{color:var(--ink)}
 .summary .warn{color:var(--amber);font-weight:600}
 .songs{border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.song,.songs-head{display:grid;grid-template-columns:62px 40px minmax(150px,2fr) minmax(120px,1.4fr) 92px 118px;gap:10px;align-items:center;padding:8px 12px}
+.song,.songs-head{display:grid;grid-template-columns:62px 40px minmax(150px,2fr) minmax(120px,1.4fr) 116px 84px;gap:10px;align-items:center;padding:8px 12px}
 .songs-head{background:var(--surface-2);font-size:12.5px;font-weight:700;color:var(--muted);border-bottom:1px solid var(--line)}
 .song{border-bottom:1px solid var(--line)}
 .song:last-child{border-bottom:none}
@@ -136,15 +136,19 @@ body.dragging .overlay{display:grid}
 .rec-time{font-weight:750;font-variant-numeric:tabular-nums;color:var(--danger)}
 .ours.drop-on{outline:3px solid var(--teal);outline-offset:1px}
 .field{min-width:0}
-.field input{width:100%;border:1px solid transparent;background:transparent;border-radius:9px;padding:6px 9px;min-height:36px}
-.field input:hover{border-color:var(--line)}
+/* the fields look like fields, so it is clear on a phone too that names can be changed */
+.field input{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:6px 9px;min-height:38px}
+.field input:hover{border-color:var(--line-2)}
 .field input:focus{border-color:var(--teal);background:var(--surface);outline:none}
 .field .t{font-weight:650}
 .orig{font-size:12px;color:var(--muted);padding:0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.year input{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;border-color:var(--line)}
-.year.missing input{border-color:color-mix(in srgb, var(--amber) 65%, transparent);background:var(--amber-soft)}
-.year.missing input::placeholder{color:var(--amber);font-weight:600}
-.year .src{display:block;text-align:center;font-size:11px;color:var(--teal);font-weight:600;min-height:15px;line-height:15px}
+.date input{text-align:center;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.2px}
+.date input::placeholder{font-weight:500;letter-spacing:0}
+.date.missing input{border-color:color-mix(in srgb, var(--amber) 65%, transparent);background:var(--amber-soft)}
+.date.missing input::placeholder{color:color-mix(in srgb, var(--amber) 85%, var(--ink))}
+.date.bad input{border-color:var(--danger);background:var(--danger-soft)}
+.date .src{display:block;text-align:center;font-size:11px;color:var(--teal);font-weight:600;min-height:15px;line-height:15px;white-space:nowrap}
+.date.bad .src{color:var(--danger)}
 .acts{display:flex;gap:2px;justify-content:flex-end}
 .empty-list{padding:24px;text-align:center;color:var(--muted)}
 .pending-box{margin-top:16px}
@@ -201,9 +205,9 @@ body.dragging .overlay{display:grid}
 @media (max-width: 820px){
   .wrap{padding:16px 12px 50px}
   .songs-head{display:none}
-  .song{grid-template-columns:46px 92px 1fr;grid-template-areas:"num title title" "play artist artist" ". year acts" "ours ours ours";row-gap:4px;padding:10px}
+  .song{grid-template-columns:46px 124px 1fr;grid-template-areas:"num title title" "play artist artist" ". date acts" "ours ours ours";row-gap:6px;padding:10px}
   .song .ours{grid-area:ours;margin-top:4px}
-  .song .badge{grid-area:num}.song .play{grid-area:play;justify-self:center}.song .f-title{grid-area:title}.song .f-artist{grid-area:artist}.song .year{grid-area:year}.song .acts{grid-area:acts;align-self:start}
+  .song .badge{grid-area:num}.song .play{grid-area:play;justify-self:center}.song .f-title{grid-area:title}.song .f-artist{grid-area:artist}.song .date{grid-area:date}.song .acts{grid-area:acts;align-self:start}
 }
 </style>
 </head>
@@ -214,7 +218,7 @@ body.dragging .overlay{display:grid}
     <div class="logo" aria-hidden="true"></div>
     <div>
       <h1>קלפי שירים · ניהול</h1>
-      <p>מוסיפים שירים, מתקנים שמות ושנים ומדפיסים קלפים. הכול עולה ישר לאתר המשחק.</p>
+      <p>מוסיפים שירים, מתקנים שמות ותאריכים ומדפיסים קלפים. הכול עולה ישר לאתר המשחק.</p>
     </div>
     <span class="spacer"></span>
     <div class="links">
@@ -327,14 +331,12 @@ body.dragging .overlay{display:grid}
       <div class="panel-body">
         <div class="list-tools">
           <div class="summary" id="summary"></div>
-          <span style="flex:1"></span>
-          <button class="btn" type="button" id="findAll"><svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.42 1.4-5.39-5.38A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg><span>מצא שנים חסרות באינטרנט</span></button>
         </div>
         <div class="songs">
-          <div class="songs-head"><div>מספר</div><div></div><div>שם השיר</div><div>זמר / להקה</div><div style="text-align:center">שנה</div><div></div></div>
+          <div class="songs-head"><div>מספר</div><div></div><div>שם השיר</div><div>זמר / להקה</div><div style="text-align:center">תאריך הביצוע</div><div></div></div>
           <div id="rows"></div>
         </div>
-        <p class="note">שינויים בשמות ובשנים נשמרים לבד. ⇄ מחליף בין שם השיר לזמר, 🔍 מחפש את שנת היציאה (כדאי לבדוק את ההצעה).</p>
+        <p class="note">אפשר לשנות כל שם, זמר ותאריך ישר ברשימה, והשינויים נשמרים לבד. התאריך הוא היום שבו הקלטנו את הביצוע שלנו (יום/חודש/שנה), והוא מה שכתוב בגב הקלף. ⇄ מחליף בין שם השיר לזמר.</p>
       </div>
     </section>
 
@@ -384,7 +386,6 @@ body.dragging .overlay{display:grid}
     play: '<svg viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5z"/></svg>',
     pause: '<svg viewBox="0 0 24 24"><path d="M7 5h3.6v14H7zM13.4 5H17v14h-3.6z"/></svg>',
     swap: '<svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3 1.4-1.4L21.8 8l-5.4 5.4L15 12l3-3H7zm10 10H6l3 3-1.4 1.4L2.2 16l5.4-5.4L9 12l-3 3h11z"/></svg>',
-    find: '<svg viewBox="0 0 24 24"><path d="M10 2a8 8 0 0 1 6.32 12.9l5.39 5.4-1.42 1.4-5.39-5.38A8 8 0 1 1 10 2zm0 2a6 6 0 1 0 0 12 6 6 0 0 0 0-12z"/></svg>',
     spin: '<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10h-2.5A7.5 7.5 0 1 1 12 4.5z"/></svg>',
     del: '<svg viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z"/></svg>',
     warn: '<svg viewBox="0 0 24 24"><path d="M12 2 1 21h22zm-1 7h2v6h-2zm0 8h2v2h-2z"/></svg>',
@@ -408,6 +409,33 @@ body.dragging .overlay{display:grid}
   function setSaved(text, isBusy) { const s = $("saved"); s.hidden = !text; s.textContent = text || ""; s.classList.toggle("busy", !!isBusy); }
   function fmtDur(s) { if (!s) return ""; const m = Math.floor(s / 60); return m + ":" + String(Math.round(s % 60)).padStart(2, "0"); }
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  // the date of our performance, kept and shown as DD/MM/YYYY
+  function dateOf(s) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(s || "");
+    if (!m) return null;
+    const d = new Date(+m[3], +m[2] - 1, +m[1]);
+    return d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1] && +m[3] >= 1900 && +m[3] <= 2100 ? d : null;
+  }
+  const fmtDate = d => String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0") + "/" + d.getFullYear();
+  // typing "27102026", "27/10/2026" or "1/3/2026" all end up as DD/MM/YYYY; the slashes appear by themselves
+  function maskDate(v) {
+    if (!/\D/.test(v)) { const s = v.slice(0, 8); return s.length > 4 ? `${s.slice(0, 2)}/${s.slice(2, 4)}/${s.slice(4)}` : s.length > 2 ? `${s.slice(0, 2)}/${s.slice(2)}` : s; }
+    const p = v.split(/\D+/).slice(0, 3);
+    for (let i = 0; i < 2 && i < p.length; i++) { // a part that grew past two digits spills into the next one
+      if (p[i].length > 2) { if (p.length === i + 1) p.push(""); p[i + 1] = p[i].slice(2) + p[i + 1]; p[i] = p[i].slice(0, 2); }
+      else if (p[i].length === 1 && p.length > i + 1) p[i] = "0" + p[i];
+    }
+    if (p.length === 3) p[2] = p[2].slice(0, 4);
+    return p.join("/");
+  }
+  // when a performance was recorded: WhatsApp and phone recorders put it in the name (PTT-20261027-WA0003), a file has its own date
+  function recordedOn(name, file) {
+    const m = /(?:^|\D)((?:19|20)\d{2})(\d{2})(\d{2})(?:\D|$)/.exec(name || "");
+    if (m && dateOf(`${m[3]}/${m[2]}/${m[1]}`)) return `${m[3]}/${m[2]}/${m[1]}`;
+    return file && file.lastModified ? fmtDate(new Date(file.lastModified)) : "";
+  }
+  const DATE_SRC = { auto: "לפי ההקלטה" };
 
   function b64ToText(b64) {
     const bin = atob(b64.replace(/\s/g, ""));
@@ -554,42 +582,6 @@ body.dragging .overlay{display:grid}
     }
   }
 
-  // ------------------------------------------------------------------ year lookup
-  let mbLast = 0;
-  async function musicbrainz(q) {
-    const wait = 1500 - (Date.now() - mbLast);
-    if (wait > 0) await sleep(wait);
-    for (let attempt = 0; attempt < 4; attempt++) {
-      mbLast = Date.now();
-      const res = await fetch("https://musicbrainz.org/ws/2/recording?fmt=json&limit=60&query=" + encodeURIComponent(q));
-      if (res.status === 503) { await sleep(2000 * (attempt + 1)); continue; }
-      if (!res.ok) throw new Error("החיפוש נכשל (" + res.status + ")");
-      return res.json();
-    }
-    throw new Error("שירות החיפוש עמוס. נסו שוב בעוד דקה.");
-  }
-  const lucene = s => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  async function lookupYear(title, artist) {
-    const data = await musicbrainz(`recording:"${lucene(title)}" AND artist:"${lucene(artist)}"`);
-    let best = null, count = 0;
-    for (const r of data.recordings || []) {
-      if ((r.score || 0) < 85) continue;
-      const m = /^(\d{4})/.exec(r["first-release-date"] || "");
-      if (!m) continue;
-      count++;
-      const y = +m[1];
-      if (!best || y < best.year) best = { year: y, title: r.title, artist: (r["artist-credit"] || []).map(a => a.name).join(" ") };
-    }
-    return best && { ...best, year: String(best.year), matches: count };
-  }
-  async function lookupSong(title, artist) {
-    if (!title || !artist) return { needArtist: true };
-    const hit = await lookupYear(title, artist);
-    if (hit) return hit;
-    const swapped = await lookupYear(artist, title);
-    return swapped ? { ...swapped, swapped: true } : null;
-  }
-
   // ------------------------------------------------------------------ connect
   // GitHub's token page starts with "Public repositories" and no Contents permission, so check exactly what the key can do
   async function connect(t, remember) {
@@ -665,7 +657,7 @@ body.dragging .overlay{display:grid}
   }
 
   function rowHtml(s, isPending) {
-    const missing = !(s.year || "").trim();
+    const missing = !dateOf(s.date);
     const id = isPending ? "p" + s.id : "n" + s.number;
     const badge = isPending
       ? (s.state === "ready" ? `<div class="badge new" title="יקבל מספר בהעלאה">חדש</div>` : `<div class="badge work">${s.state === "error" ? "שגיאה" : Math.round((s.progress || 0) * 100) + "%"}</div>`)
@@ -678,10 +670,9 @@ body.dragging .overlay{display:grid}
       <button class="play${previewId === id ? " on" : ""}" type="button" data-act="play" data-pid="${id}" aria-label="השמעת השיר המקורי"${isPending && s.state !== "ready" ? " disabled" : ""}>${previewId === id ? ICONS.pause : ICONS.play}</button>
       <div class="field f-title"><input class="t" data-f="title" value="${esc(s.title)}" placeholder="שם השיר" aria-label="שם השיר"><div class="orig"><bdi>${orig}</bdi></div></div>
       <div class="field f-artist"><input data-f="artist" value="${esc(s.artist)}" placeholder="זמר / להקה" aria-label="זמר"></div>
-      <div class="field year${missing ? " missing" : ""}"><input data-f="year" value="${esc(s.year)}" placeholder="שנה?" inputmode="numeric" maxlength="4" aria-label="שנה"><span class="src">${s.year_source === "auto" ? "הצעה מהאינטרנט" : ""}</span></div>
+      <div class="field date${missing ? " missing" : ""}"><input data-f="date" value="${esc(s.date || "")}" placeholder="יום/חודש/שנה" inputmode="numeric" maxlength="10" dir="ltr" aria-label="תאריך הביצוע שלנו (יום/חודש/שנה)"><span class="src">${DATE_SRC[s.date_source] || ""}</span></div>
       <div class="acts">
         <button class="icon-btn" type="button" data-act="swap" title="החלפה בין שם השיר לזמר" aria-label="החלפה">${ICONS.swap}</button>
-        <button class="icon-btn" type="button" data-act="find" title="חיפוש שנה באינטרנט" aria-label="חיפוש שנה">${ICONS.find}</button>
         <button class="icon-btn danger" type="button" data-act="del" title="${isPending ? "הסרה מהרשימה" : "מחיקה מהמשחק"}" aria-label="הסרה">${ICONS.del}</button>
       </div>
       ${isPending && s.state === "error" ? "" : oursHtml(s, isPending, id)}
@@ -733,11 +724,10 @@ body.dragging .overlay{display:grid}
     renderSharedList();
     const songs = [...lib.songs].sort((a, b) => a.number - b.number);
     $("rows").innerHTML = songs.map(s => rowHtml(s, false)).join("") || '<div class="empty-list">עוד אין שירים במשחק. הוסיפו שירים למעלה.</div>';
-    const missing = songs.filter(s => !(s.year || "").trim()).length;
+    const missing = songs.filter(s => !dateOf(s.date)).length;
     const noOurs = songs.filter(s => !s.ours).length;
-    $("summary").innerHTML = (songs.length === 1 ? "<b>שיר אחד</b>" : `<b>${songs.length}</b> שירים`) +(songs.length ? (missing ? ` · <span class="warn">${missing} בלי שנה</span>` : " · לכולם יש שנה ✓")
+    $("summary").innerHTML = (songs.length === 1 ? "<b>שיר אחד</b>" : `<b>${songs.length}</b> שירים`) +(songs.length ? (missing ? ` · <span class="warn">${missing} בלי תאריך</span>` : " · לכולם יש תאריך ✓")
       + (noOurs ? ` · <span class="warn">${noOurs} בלי הביצוע שלנו</span>` : " · לכולם יש ביצוע ✓") : "");
-    $("findAll").hidden = missing === 0;
     $("libMeta").innerHTML = `הקלפים מובילים אל <span dir="ltr">${esc(CFG.siteUrl)}</span>`;
   }
 
@@ -769,7 +759,7 @@ body.dragging .overlay{display:grid}
           const s = fresh.songs.find(x => x.number === +num);
           if (s) Object.assign(s, f);
         }
-      }, "עדכון שמות ושנים");
+      }, "עדכון שמות ותאריכים");
       setSaved("נשמר ✓");
       renderPrint();
     } catch (e) {
@@ -789,7 +779,7 @@ body.dragging .overlay{display:grid}
   }
   function setField(id, field, value, extra) {
     const { pending: isP, item } = findItem(id); if (!item) return;
-    if (isP) { item[field] = value; if (field !== "year") item.edited = true; if (extra) Object.assign(item, extra); }
+    if (isP) { item[field] = value; if (field !== "date") item.edited = true; if (extra) Object.assign(item, extra); }
     else queueEdit(item.number, field, value, extra);
   }
 
@@ -797,12 +787,22 @@ body.dragging .overlay{display:grid}
     $(box).addEventListener("input", e => {
       const inp = e.target.closest("input[data-f]"); if (!inp) return;
       const row = inp.closest(".song"), f = inp.dataset.f;
-      if (f === "year") {
-        inp.value = inp.value.replace(/\D/g, "").slice(0, 4);
-        row.querySelector(".year").classList.toggle("missing", !inp.value);
-        row.querySelector(".year .src").textContent = "";
+      if (f === "date") {
+        const v = maskDate(inp.value);
+        if (v !== inp.value) inp.value = v;
+        const box = row.querySelector(".date"), ok = !!dateOf(v);
+        box.classList.toggle("missing", !v);
+        box.classList.toggle("bad", v.length === 10 && !ok);
+        box.querySelector(".src").textContent = v.length === 10 && !ok ? "אין תאריך כזה" : "";
+        if (v && !ok) return; // half-typed: keep the saved date until this one is whole
+        return setField(row.dataset.id, "date", v, { date_source: "manual" });
       }
-      setField(row.dataset.id, f, inp.value.trim(), f === "year" ? { year_source: "manual" } : null);
+      setField(row.dataset.id, f, inp.value.trim());
+    });
+    // leaving a half-typed date: say so (the last good date stays saved)
+    $(box).addEventListener("focusout", e => {
+      const inp = e.target.closest("input[data-f=date]"); if (!inp || !inp.value || dateOf(inp.value)) return;
+      const d = inp.closest(".date"); d.classList.add("bad"); d.querySelector(".src").textContent = "חסר: יום/חודש/שנה";
     });
     $(box).addEventListener("click", e => {
       const btn = e.target.closest("button[data-act]"); if (!btn) return;
@@ -815,7 +815,6 @@ body.dragging .overlay{display:grid}
         setField(id, "title", t.value.trim()); setField(id, "artist", a.value.trim());
         return;
       }
-      if (act === "find") return findYear(id, true).catch(err => toast(err.message, true));
       if (act === "del") return isP ? removePending(item) : deleteSong(item);
       if (act === "oplay") return togglePreview("o" + id, isP ? item.ours.url
         : CFG.siteUrl + "songs/" + item.number + "-b.mp3?v=" + encodeURIComponent((item.ours && item.ours.sha1) || ""));
@@ -830,51 +829,6 @@ body.dragging .overlay{display:grid}
       }
     });
   }
-
-  async function findYear(id, loud) {
-    let row = document.querySelector(`.song[data-id="${id}"]`); if (!row) return false;
-    const { item } = findItem(id); if (!item) return false;
-    let btn = row.querySelector('[data-act=find]');
-    const title = row.querySelector('[data-f=title]').value.trim(), artist = row.querySelector('[data-f=artist]').value.trim();
-    btn.classList.add("busy"); btn.innerHTML = ICONS.spin;
-    try {
-      const r = await lookupSong(title, artist);
-      // the list may have been redrawn while waiting for the answer
-      row = document.querySelector(`.song[data-id="${id}"]`) || row;
-      btn = row.querySelector('[data-act=find]');
-      if (r && r.needArtist) { if (loud) toast(`כדי לחפש שנה ל"${title}" כתבו קודם את שם הזמר`, true); return false; }
-      if (!r) { if (loud) toast(`לא נמצאה שנה ל"${title}". אפשר לכתוב אותה ידנית.`, true); return false; }
-      if (r.swapped) {
-        const t = row.querySelector('[data-f=title]'), a = row.querySelector('[data-f=artist]');
-        [t.value, a.value] = [a.value, t.value];
-        setField(id, "title", t.value.trim()); setField(id, "artist", a.value.trim());
-      }
-      row.querySelector('[data-f=year]').value = r.year;
-      row.querySelector(".year").classList.remove("missing");
-      const src = row.querySelector(".year .src"); src.textContent = "הצעה מהאינטרנט"; src.title = `נמצא: ${r.title} · ${r.artist}`;
-      setField(id, "year", r.year, { year_source: "auto" });
-      if (loud) toast(`נמצאה שנה ${r.year}${r.swapped ? " (והוחלפו שם השיר והזמר)" : ""}. כדאי לוודא שזו השנה הנכונה.`);
-      return true;
-    } finally {
-      btn.classList.remove("busy"); btn.innerHTML = ICONS.find;
-    }
-  }
-  $("findAll").addEventListener("click", async () => {
-    const btn = $("findAll"), label = btn.querySelector("span");
-    const missing = lib.songs.filter(s => !(s.year || "").trim());
-    const todo = missing.filter(s => (s.artist || "").trim());
-    if (!todo.length) return toast("לשירים בלי שנה אין עדיין שם זמר. כתבו אותו ואז אפשר לחפש.", true);
-    btn.disabled = true; let found = 0, failed = 0;
-    try {
-      for (let i = 0; i < todo.length; i++) {
-        label.textContent = `מחפש ${i + 1} מתוך ${todo.length}...`;
-        try { if (await findYear("n" + todo[i].number, false)) found++; failed = 0; }
-        catch (err) { if (++failed >= 3) throw err; }
-      }
-      toast(`נמצאו שנים ל־${found} מתוך ${todo.length} שירים. כדאי לעבור עליהן ולוודא.`);
-    } catch (err) { toast(err.message, true); }
-    finally { btn.disabled = false; label.textContent = "מצא שנים חסרות באינטרנט"; renderLibrary(); }
-  });
 
   async function deleteSong(s) {
     if (busy) return;
@@ -1002,7 +956,9 @@ body.dragging .overlay{display:grid}
   const rerenderRow = id => id[0] === "p" ? renderPending() : renderLibrary();
   const isMedia = f => AUDIO_EXT.test(f.name || "") || /^(audio|video)\//.test(f.type || "");
 
-  async function addOurs(id, file, name) {
+  // "when" is the day it was recorded; it fills the song's date unless someone typed one by hand
+  const takesDate = s => !dateOf(s.date) || s.date_source === "auto";
+  async function addOurs(id, file, name, when) {
     const { pending: isP, item } = findItem(id); if (!item) return;
     const job = { state: "working", progress: 0 };
     if (previewId === "o" + id) stopPreview();
@@ -1023,10 +979,11 @@ body.dragging .overlay{display:grid}
       if (isP) {
         if (item.ours !== job) return URL.revokeObjectURL(out.url); // replaced or removed in the meantime
         item.ours = { state: "ready", blob: out.blob, url: out.url, duration: out.duration, name, sha1: hash };
+        if (when && takesDate(item)) Object.assign(item, { date: when, date_source: "auto" });
       } else {
         URL.revokeObjectURL(out.url);
         job.progress = 0; job.saving = true; rerenderRow(id);
-        await uploadOurs(item, out.blob, { original_name: name, duration: Math.round(out.duration), sha1: hash });
+        await uploadOurs(item, out.blob, { original_name: name, duration: Math.round(out.duration), sha1: hash }, when);
         if (oursJobs[item.number] === job) delete oursJobs[item.number];
         toast(`הביצוע של שיר ${item.number} נשמר. הוא יעבוד באתר תוך דקה בערך.`);
       }
@@ -1038,13 +995,14 @@ body.dragging .overlay{display:grid}
       rerenderRow(id);
     }
   }
-  async function uploadOurs(s, blob, info) {
+  async function uploadOurs(s, blob, info, when) {
     setSaved("שומר את הביצוע...", true);
     const b = await gh(repoPath(CFG.siteRepo) + "/git/blobs", { method: "POST", body: JSON.stringify({ content: await blobToB64(blob), encoding: "base64" }) });
     await commitSite([{ path: `songs/${s.number}-b.mp3`, sha: b.sha }], `ביצוע לשיר ${s.number}`);
     await saveLibrary(f => {
       const x = f.songs.find(y => y.number === s.number);
       if (x) x.ours = { ...info, added: new Date().toISOString() };
+      if (x && when && takesDate(x)) Object.assign(x, { date: when, date_source: "auto" });
     }, `ביצוע לשיר ${s.number}`);
     setSaved("נשמר ✓");
   }
@@ -1077,7 +1035,7 @@ body.dragging .overlay{display:grid}
       if (r.cancelled || !r.chunks.length || !findItem(id).item) return rerenderRow(id);
       if (secs < 2) { toast("ההקלטה קצרה מדי. נסו שוב.", true); return rerenderRow(id); }
       const blob = new Blob(r.chunks, { type: recorder.mimeType || type || "audio/webm" });
-      addOurs(id, blob, `הקלטה מ־${new Date().toLocaleDateString("he-IL")}`);
+      addOurs(id, blob, `הקלטה מ־${new Date().toLocaleDateString("he-IL")}`, fmtDate(new Date()));
     };
     recorder.start(1000);
     r.timer = setInterval(() => {
@@ -1096,7 +1054,7 @@ body.dragging .overlay{display:grid}
     const id = oursTarget; oursTarget = null;
     if (!f || !id) return;
     if (!isMedia(f)) return toast("זה לא נראה כמו קובץ שמע. בחרו קובץ הקלטה או שיר.", true);
-    addOurs(id, f, f.name);
+    addOurs(id, f, f.name, recordedOn(f.name, f));
   });
   async function runQueue() {
     if (preparing) return;
@@ -1123,7 +1081,7 @@ body.dragging .overlay{display:grid}
     files = files.filter(f => AUDIO_EXT.test(f.name));
     if (!files.length) return toast("לא נמצאו קבצי שירים בבחירה הזו", true);
     files.sort((a, b) => a.name.localeCompare(b.name, "he"));
-    for (const f of files) pending.push({ id: nextPendingId++, file: f, name: f.name, title: "", artist: "", year: "", state: "queued", progress: 0 });
+    for (const f of files) pending.push({ id: nextPendingId++, file: f, name: f.name, title: "", artist: "", date: "", state: "queued", progress: 0 });
     guessNames();
     renderPending();
     runQueue();
@@ -1178,7 +1136,7 @@ body.dragging .overlay{display:grid}
     if (strip && !strip.classList.contains("recording") && !strip.classList.contains("working")) { // dropped on "our performance"
       const f = files.find(isMedia);
       if (!f) return toast("זה לא נראה כמו קובץ שמע.", true);
-      return addOurs(strip.closest(".song").dataset.id, f, f.name);
+      return addOurs(strip.closest(".song").dataset.id, f, f.name, recordedOn(f.name, f));
     }
     addFiles(files);
   });
@@ -1257,7 +1215,7 @@ body.dragging .overlay{display:grid}
     if (b.querySelector(".tag.has") && !confirm(`ל"${song.title || "השיר הזה"}" כבר יש ביצוע. להחליף אותו בהקלטה הזו?`)) return;
     await forgetShared(item);
     renderShared();
-    addOurs(id, item.blob, sharedName(item.name));
+    addOurs(id, item.blob, sharedName(item.name), recordedOn(item.name));
     const row = document.querySelector(`.song[data-id="${id}"]`);
     if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
     toast(shared.length ? "ההקלטה שויכה. עכשיו ההקלטה הבאה." : "ההקלטה שויכה לשיר");
@@ -1281,8 +1239,8 @@ body.dragging .overlay{display:grid}
     if (busy) return;
     const ready = pending.filter(p => p.state === "ready");
     if (!ready.length || ready.some(p => !hasOurs(p))) return;
-    const noYear = ready.filter(p => !(p.year || "").trim()).length;
-    if (noYear && !confirm(`ל־${noYear} שירים אין שנה. אפשר להעלות עכשיו ולהוסיף שנה אחר כך. להמשיך?`)) return;
+    const noDate = ready.filter(p => !dateOf(p.date)).length;
+    if (noDate && !confirm(`ל־${noDate === 1 ? "שיר אחד" : noDate + " שירים"} אין תאריך של הביצוע שלנו. אפשר להעלות עכשיו ולהוסיף אותו אחר כך. להמשיך?`)) return;
     busy = true; renderPending();
     $("upProgress").hidden = false;
     const label = $("uploadLabel");
@@ -1313,7 +1271,7 @@ body.dragging .overlay{display:grid}
         f.next_number = Math.max(f.next_number, next);
         for (const p of ready) {
           f.songs = f.songs.filter(s => s.number !== p.number);
-          f.songs.push({ number: p.number, title: p.title, artist: p.artist, year: p.year, year_source: p.year_source || "",
+          f.songs.push({ number: p.number, title: p.title, artist: p.artist, date: dateOf(p.date) ? p.date : "", date_source: p.date_source || "",
                          original_name: p.name, duration: Math.round(p.duration || 0), sha1: p.sha1, added: new Date().toISOString(),
                          ours: { original_name: p.ours.name, duration: Math.round(p.ours.duration || 0), sha1: p.ours.sha1, added: new Date().toISOString() } });
         }
@@ -1344,18 +1302,18 @@ body.dragging .overlay{display:grid}
   const MIC = '<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>';
   const NOTE = '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg>';
   // one card per A4 sheet, black ink only. page 1: the code for the original song.
-  // page 2 (the back of the same sheet): year, artist, title, and the code for our performance
+  // page 2 (the back of the same sheet): artist, the date of our performance, title, and the code for our performance
   function cardsHtml(songs) {
     const front = s => `<section class="sheet front">
       <div class="brand">קלפי שירים</div>
       <div class="qr">${qrSvg(CFG.siteUrl + "#" + s.number)}</div>
       <div class="cap">${NOTE}השיר המקורי</div>
-      <div class="hint">סרקו עם הטלפון, הקשיבו, ונחשו באיזו שנה הוא יצא</div>
+      <div class="hint">סרקו עם הטלפון, הקשיבו, ונחשו מתי שרנו אותו</div>
       <div class="num">${s.number}</div></section>`;
     const back = s => `<section class="sheet back${s.ours ? "" : " solo"}">
       <div class="info">
         <div class="artist fit">${esc(s.artist)}</div>
-        <div class="year"><span>${esc(s.year || "????")}</span></div>
+        <div class="date"><span dir="ltr">${esc(dateOf(s.date) ? s.date : "??/??/????")}</span></div>
         <div class="title fit">${esc(s.title)}</div>
       </div>
       ${s.ours ? `<div class="ours">
@@ -1388,8 +1346,9 @@ svg{display:block}
 .back{justify-content:space-evenly;padding:22mm 24mm 30mm}
 .back .info{width:100%;display:flex;flex-direction:column;align-items:center;gap:3mm}
 .back .artist{height:34mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:36pt;font-weight:800;line-height:1.12;overflow:hidden}
-.back .year{width:100%;display:flex;align-items:center;gap:7mm;font-size:96pt;font-weight:900;line-height:1;letter-spacing:-1pt;font-variant-numeric:tabular-nums}
-.back .year::before,.back .year::after{content:"";flex:1;border-top:1.1mm solid #000}
+.back .date{width:100%;display:flex;align-items:center;gap:6mm;font-size:58pt;font-weight:900;line-height:1;letter-spacing:-.5pt;font-variant-numeric:tabular-nums}
+.back .date span{unicode-bidi:isolate}
+.back .date::before,.back .date::after{content:"";flex:1;min-width:6mm;border-top:1.1mm solid #000}
 .back .title{height:30mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:30pt;font-weight:500;line-height:1.15;overflow:hidden}
 .back .ours{display:flex;align-items:center;justify-content:center;gap:9mm}
 .back .tile{width:92mm;height:92mm;flex:none}
@@ -1399,12 +1358,12 @@ svg{display:block}
 .back .otext b{font-size:26pt;font-weight:800}
 .back .otext span{font-size:15pt}
 .back.solo{justify-content:center}
-.back.solo .artist{height:50mm;font-size:44pt}.back.solo .year{font-size:130pt;margin:8mm 0}.back.solo .title{height:44mm;font-size:36pt}
+.back.solo .artist{height:50mm;font-size:44pt}.back.solo .date{font-size:66pt;margin:10mm 0}.back.solo .title{height:44mm;font-size:36pt}
 .back .bnum{position:absolute;bottom:19mm;left:24mm;right:24mm;font-size:14pt;font-weight:800}
 </style></head><body>
 <div class="howto"><h1>איך מדפיסים</h1>כל קלף מקבל <b>דף A4 משלו</b>: עמוד אחד הוא החזית ועמוד אחריו הגב. מדפיסים <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. אין מה לגזור.<br>
 הקלפים בשחור־לבן, כך שאפשר להדפיס במדפסת רגילה בלי צבע. במדפסת בלי הדפסה דו־צדדית: מדפיסים את העמודים האי־זוגיים, מחזירים את הדפים למגש ומדפיסים את הזוגיים.<br>
-מקדימה: הקוד של <b>השיר המקורי</b>. מאחורה: השנה, הזמר, שם השיר והקוד של <b>הביצוע שלנו</b>.<br><button onclick="print()">הדפסה</button></div>
+מקדימה: הקוד של <b>השיר המקורי</b>. מאחורה: הזמר, התאריך של הביצוע שלנו, שם השיר והקוד של <b>הביצוע שלנו</b>.<br><button onclick="print()">הדפסה</button></div>
 ${pages.join("\n")}
 <script>for(const el of document.querySelectorAll(".fit")){let s=parseFloat(getComputedStyle(el).fontSize);while((el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&s>14){s-=1;el.style.fontSize=s+"px"}}setTimeout(()=>print(),400)<\/script>
 </body></html>`;
@@ -1414,8 +1373,8 @@ ${pages.join("\n")}
     await flushEdits();
     const songs = [...lib.songs].filter(s => !onlyNew || s.number > lib.printed_upto).sort((a, b) => a.number - b.number);
     if (!songs.length) return;
-    const missing = songs.filter(s => !(s.year || "").trim()).length;
-    if (missing && !confirm(`ל־${missing} קלפים אין שנה, ובגב שלהם יהיה כתוב "????". להדפיס בכל זאת?`)) return;
+    const missing = songs.filter(s => !dateOf(s.date)).length;
+    if (missing && !confirm(`ל־${missing} קלפים אין תאריך, ובגב שלהם יהיה כתוב "??/??/????". להדפיס בכל זאת?`)) return;
     const noOurs = songs.filter(s => !s.ours).length;
     if (noOurs && !confirm(`ל־${noOurs} קלפים אין עדיין את הביצוע שלנו, ובגב שלהם לא יהיה קוד. להדפיס בכל זאת?`)) return;
     const w = window.open("", "_blank");

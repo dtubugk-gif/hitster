@@ -71,7 +71,8 @@ a{color:var(--teal)}
 /* connect */
 .connect{max-width:680px;margin:0 auto}
 .connect ol{padding-right:22px;line-height:1.9;margin:6px 0 16px}
-.connect li b{font-weight:700}
+.connect li b{font-weight:700;unicode-bidi:plaintext}
+.connect .warn-note{display:block;font-size:13px;color:var(--danger);line-height:1.5}
 .connect code{direction:ltr;unicode-bidi:isolate;font-family:Consolas,monospace;background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:0 6px;font-size:13.5px}
 .token-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .token-row input[type=password]{flex:1;min-width:240px;direction:ltr;text-align:left;border:1px solid var(--line-2);border-radius:12px;padding:10px 12px;background:var(--surface);min-height:46px;font-family:Consolas,monospace}
@@ -178,9 +179,10 @@ body.dragging .overlay{display:grid}
       <p>כדי שהדף הזה יוכל להעלות שירים לאתר, הוא צריך מפתח גישה מהחשבון שלכם ב-GitHub. המפתח פותח רק את שני המאגרים של המשחק.</p>
       <ol>
         <li>פתחו את <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">דף יצירת המפתח ב-GitHub</a> (צריך להיות מחוברים לחשבון <b id="ownerName"></b>).</li>
-        <li><b>Token name:</b> כתבו <code>קלפי שירים</code>. <b>Expiration:</b> בחרו כמה זמן המפתח יעבוד (למשל שנה).</li>
-        <li><b>Repository access:</b> בחרו <b>Only select repositories</b> וסמנו את <code id="repo1"></code> ואת <code id="repo2"></code>.</li>
-        <li><b>Permissions → Repository permissions → Contents:</b> בחרו <b>Read and write</b>.</li>
+        <li><b>Token name:</b> כתבו <code>קלפי שירים</code>. <b>Expiration:</b> בחרו כמה זמן המפתח יעבוד (למשל 366 days).</li>
+        <li><b>Repository access:</b> סמנו <b>Only select repositories</b>, לחצו על <b>Select repositories</b> ובחרו את <code id="repo1"></code> ואת <code id="repo2"></code>.
+          <span class="warn-note">ברירת המחדל (Public repositories) לא תעבוד.</span></li>
+        <li><b>Permissions:</b> לחצו <b>+ Add permissions</b>, סמנו <b>Contents</b>, ואז בשורה של Contents שנו את <b>Access: Read-only</b> ל-<b>Read and write</b>.</li>
         <li>לחצו <b>Generate token</b>, העתיקו את המפתח (מתחיל ב-<code>github_pat_</code>) והדביקו אותו כאן:</li>
       </ol>
       <form class="token-row" id="tokenForm" autocomplete="off">
@@ -285,6 +287,8 @@ body.dragging .overlay{display:grid}
     if (q.get("site")) CFG.siteUrl = q.get("site");
   }
   const TOKEN_KEY = "kalfei-shirim.token";
+  const en = s => "⁨" + s + "⁩"; // keeps English button names in order inside a Hebrew sentence
+  const NO_WRITE = `למפתח אין הרשאה לשמור קבצים. צרו מפתח חדש, וב-${en("Permissions")} לחצו ${en("+ Add permissions")}, סמנו ${en("Contents")}, ואז שנו את ${en("Access: Read-only")} ל-${en("Read and write")}.`;
 
   const $ = id => document.getElementById(id);
   const ICONS = {
@@ -353,6 +357,7 @@ body.dragging .overlay{display:grid}
       let msg = (data && data.message) || ("שגיאה " + res.status);
       if (res.status === 401) msg = "המפתח לא תקין או שפג תוקפו. התחברו מחדש עם מפתח חדש.";
       if (res.status === 403 && /rate limit/i.test(msg)) msg = "GitHub ביקש להאט. נסו שוב בעוד כמה דקות.";
+      else if (res.status === 403 && /not accessible/i.test(msg)) msg = NO_WRITE;
       throw Object.assign(new Error(msg), { status: res.status, data });
     }
     return data;
@@ -493,14 +498,21 @@ body.dragging .overlay{display:grid}
   }
 
   // ------------------------------------------------------------------ connect
+  // GitHub's token page starts with "Public repositories" and no Contents permission, so check exactly what the key can do
   async function connect(t, remember) {
-    token = t;
-    const [site, data] = await Promise.all([gh(repoPath(CFG.siteRepo)), gh(repoPath(CFG.dataRepo))]).catch(e => {
-      if (e.status === 404) throw new Error(`למפתח אין גישה למאגרים ${CFG.siteRepo} ו-${CFG.dataRepo}. בדקו שסימנתם את שניהם ב-Repository access.`);
-      throw e;
-    });
-    if (site.permissions && !site.permissions.push || data.permissions && !data.permissions.push)
-      throw new Error("למפתח אין הרשאת כתיבה. ב-Permissions בחרו Contents: Read and write.");
+    token = t.replace(/^(bearer|token)\s+/i, "").trim();
+    if (/\s/.test(token)) throw new Error("נראה שהודבק יותר מהמפתח עצמו. העתיקו שוב רק את המפתח (מתחיל ב-github_pat_).");
+    const notSelected = repos => `המפתח לא פותח את המאגר ${repos.map(en).join(" ואת ")}. צרו מפתח חדש, וב-${en("Repository access")} סמנו ${en("Only select repositories")}, לחצו ${en("Select repositories")} ובחרו את ${en(CFG.siteRepo)} ואת ${en(CFG.dataRepo)}.`;
+    const canRead = repo => gh(repoPath(repo)).then(() => true, e => { if (e.status === 404) return false; throw e; });
+    const reads = await Promise.all([CFG.siteRepo, CFG.dataRepo].map(canRead));
+    if (!reads[1]) throw new Error(notSelected(reads[0] ? [CFG.dataRepo] : [CFG.siteRepo, CFG.dataRepo]));
+    // an empty blob is harmless (every repo already has it) and needs the same permission as an upload
+    const canWrite = repo => gh(repoPath(repo) + "/git/blobs", { method: "POST", body: JSON.stringify({ content: "", encoding: "utf-8" }) })
+      .then(() => true, e => { if (e.status === 403 || e.status === 404) return false; throw e; });
+    const writes = await Promise.all([CFG.siteRepo, CFG.dataRepo].map(canWrite));
+    if (!writes[0] && !writes[1]) throw new Error(NO_WRITE);
+    if (!writes[0]) throw new Error(notSelected([CFG.siteRepo]));
+    if (!writes[1]) throw new Error(notSelected([CFG.dataRepo]));
     lib = await loadLibrary();
     try {
       (remember ? localStorage : sessionStorage).setItem(TOKEN_KEY, t);
@@ -927,7 +939,8 @@ body.dragging .overlay{display:grid}
       for (const p of ready) { if (previewId === "p" + p.id) stopPreview(); URL.revokeObjectURL(p.url); }
       pending = pending.filter(p => !ready.includes(p));
       renderAll();
-      $("banners").innerHTML = `<div class="banner ok">${ICONS.ok}<div>הועלו ${ready.length} שירים (מספרים ${ready[0].number}–${ready[ready.length - 1].number}). הם יעבדו באתר תוך דקה בערך. עכשיו אפשר להדפיס את הקלפים החדשים.</div></div>`;
+      const what = ready.length === 1 ? `השיר הועלה (מספר ${ready[0].number}). הוא יעבוד` : `הועלו ${ready.length} שירים (מספרים ${ready[0].number}–${ready[ready.length - 1].number}). הם יעבדו`;
+      $("banners").innerHTML = `<div class="banner ok">${ICONS.ok}<div>${what} באתר תוך דקה בערך. עכשיו אפשר להדפיס את הקלפים החדשים.</div></div>`;
       toast("השירים הועלו!");
     } catch (e) {
       ready.forEach(p => { delete p.number; });

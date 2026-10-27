@@ -6,6 +6,9 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="referrer" content="no-referrer">
 <title>קלפי שירים · ניהול</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#F5EEE1">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23211C17'/%3E%3Ccircle cx='32' cy='32' r='11' fill='%2316786B'/%3E%3Ccircle cx='32' cy='32' r='2.5' fill='%23F5EEE1'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -145,6 +148,36 @@ body.dragging .overlay{display:grid}
 .acts{display:flex;gap:2px;justify-content:flex-end}
 .empty-list{padding:24px;text-align:center;color:var(--muted)}
 .pending-box{margin-top:16px}
+/* recordings shared into the app (WhatsApp voice notes) */
+.panel.shared{border-color:color-mix(in srgb, var(--teal) 50%, var(--line));box-shadow:0 0 0 3px color-mix(in srgb, var(--teal) 14%, transparent), var(--shadow)}
+.step.mic{background:var(--teal);color:#fff}.step.mic svg{width:17px;height:17px;fill:currentColor}
+.shared-rec{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.shared-rec .sm-meta{flex:1;min-width:0}
+.shared-rec b{display:block;overflow-wrap:anywhere;line-height:1.3}
+.shared-rec span{color:var(--muted);font-size:13px}
+.shared-q{font-weight:750;margin:16px 0 8px}
+.shared-filter{width:100%;border:1px solid var(--line-2);border-radius:12px;padding:9px 12px;background:var(--surface);min-height:44px;margin-bottom:10px}
+.shared-list{display:grid;grid-template-columns:repeat(auto-fill, minmax(240px, 1fr));gap:8px}
+.pick{display:flex;align-items:center;gap:10px;text-align:right;border:1px solid var(--line-2);background:var(--surface);border-radius:12px;padding:8px 10px;min-height:54px;cursor:pointer;font:inherit;color:inherit;transition:background .15s, border-color .15s}
+.pick:hover{border-color:var(--teal);background:var(--teal-soft)}
+.pick:focus-visible{outline:3px solid color-mix(in srgb, var(--teal) 55%, transparent);outline-offset:2px}
+.pick .badge{height:30px;min-width:40px;font-size:13.5px}
+.pick .pt{flex:1;min-width:0}
+.pick .pt b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+.pick .pt span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick .tag{font-size:11.5px;font-weight:700;border-radius:99px;padding:2px 8px;flex:none}
+.tag.need{background:var(--amber-soft);color:color-mix(in srgb, var(--amber) 80%, var(--ink))}
+.tag.has{background:var(--surface-2);color:var(--muted)}
+.wa-help{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:0 14px}
+.wa-help summary{cursor:pointer;list-style:none;display:flex;gap:10px;align-items:center;padding:12px 0;flex-wrap:wrap}
+.wa-help summary::-webkit-details-marker{display:none}
+.wa-help summary svg{width:22px;height:22px;fill:var(--teal);flex:none}
+.wa-help summary span{color:var(--muted);font-size:13.5px}
+.wa-help summary::after{content:"+";margin-inline-start:auto;font-size:20px;line-height:1;color:var(--muted)}
+.wa-help[open] summary::after{content:"–"}
+.wa-help ol{padding-right:22px;line-height:1.85;margin:0 0 6px}
+.wa-help li b{unicode-bidi:plaintext}
+.wa-help .note{margin:0 0 12px}
 .pending-box h3{font-size:15.5px;margin-bottom:8px}
 .go{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:14px}
 .go p{color:var(--muted);font-size:14px}
@@ -216,6 +249,25 @@ body.dragging .overlay{display:grid}
   </section>
 
   <div id="app" hidden>
+    <!-- a recording shared from WhatsApp -->
+    <section class="panel shared" id="sharedPanel" hidden>
+      <div class="panel-head">
+        <div class="step mic"><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg></div>
+        <h2>התקבלה הקלטה</h2>
+        <div class="meta" id="sharedCount"></div>
+      </div>
+      <div class="panel-body">
+        <div class="shared-rec">
+          <button class="play" type="button" id="sharedPlay" data-pid="shared" aria-label="השמעת ההקלטה"></button>
+          <div class="sm-meta"><b id="sharedName"></b><span id="sharedDur"></span></div>
+          <button class="link" type="button" id="sharedSkip">לא צריך אותה</button>
+        </div>
+        <p class="shared-q">לאיזה שיר זה הביצוע שלנו?</p>
+        <input class="shared-filter" id="sharedFilter" type="search" placeholder="חיפוש שיר או זמר..." aria-label="חיפוש שיר" hidden>
+        <div class="shared-list" id="sharedList"></div>
+      </div>
+    </section>
+
     <!-- add -->
     <section class="panel">
       <div class="panel-head">
@@ -236,6 +288,18 @@ body.dragging .overlay{display:grid}
         <input type="file" id="fileInput" multiple accept="audio/*,.mp3,.m4a,.wav,.flac,.ogg,.opus,.aac" hidden>
         <input type="file" id="folderInput" webkitdirectory multiple hidden>
         <input type="file" id="oursInput" accept="audio/*,video/*,.mp3,.m4a,.wav,.flac,.ogg,.opus,.aac,.webm,.mp4" hidden>
+        <details class="wa-help" id="waHelp">
+          <summary><svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg><b>הביצוע שלנו מוואטסאפ</b><span>שולחים הקלטה ישר מוואטסאפ, בלי להוריד אותה למחשב</span></summary>
+          <ol>
+            <li>בטלפון (אנדרואיד) פותחים את הדף הזה ב-Chrome, מתחברים עם המפתח ומתקינים אותו כאפליקציה:
+              <button class="btn sm teal" type="button" id="installBtn" hidden>התקנה</button>
+              <span id="installManual">בתפריט ⋮ בוחרים <b>הוספה למסך הבית</b> ואז <b>התקנה</b>.</span> עושים את זה פעם אחת.</li>
+            <li>בוואטסאפ לוחצים לחיצה ארוכה על ההקלטה, ואז ⋮ ← <b>שיתוף</b>.</li>
+            <li>ברשימת האפליקציות בוחרים <b>ניהול שירים</b>.</li>
+            <li>הדף נפתח עם ההקלטה. בוחרים לאיזה שיר היא שייכת, והיא נשמרת כביצוע שלנו.</li>
+          </ol>
+          <p class="note">באייפון אי אפשר לשתף ישר לאתר: בוואטסאפ שומרים את ההקלטה (שיתוף ← שמירה בקבצים), ואז בוחרים אותה ב"בחירת קובץ" בשורה של השיר.</p>
+        </details>
         <div class="progress" id="prepProgress" hidden><span id="prepText"></span><div class="bar"><i id="prepBar"></i></div></div>
 
         <div class="pending-box" id="pendingBox" hidden>
@@ -305,6 +369,9 @@ body.dragging .overlay{display:grid}
   // test hooks, honoured only on this computer so a crafted link can never send the key elsewhere
   if (["localhost", "127.0.0.1"].includes(location.hostname)) {
     const q = new URLSearchParams(location.search);
+    try { // kept for the session, so they survive the page reload that follows a share
+      for (const k of ["api", "site"]) { if (q.get(k)) sessionStorage.setItem("test-" + k, q.get(k)); else if (sessionStorage.getItem("test-" + k)) q.set(k, sessionStorage.getItem("test-" + k)); }
+    } catch (e) {}
     if (q.get("api")) CFG.api = q.get("api");
     if (q.get("site")) CFG.siteUrl = q.get("site");
   }
@@ -554,7 +621,8 @@ body.dragging .overlay{display:grid}
   }
   function showConnect(msg) {
     $("app").hidden = true; $("connectPanel").hidden = false; $("logout").hidden = true;
-    $("banners").innerHTML = msg ? `<div class="banner err">${ICONS.warn}<div>${esc(msg)}</div></div>` : "";
+    $("banners").innerHTML = (msg ? `<div class="banner err">${ICONS.warn}<div>${esc(msg)}</div></div>` : "")
+      + (SHARED_ARRIVED && SHARED_ARRIVED !== "error" && SHARED_ARRIVED !== "0" ? `<div class="banner ok">${ICONS.ok}<div>ההקלטה התקבלה ונשמרה. התחברו, ואז תבחרו לאיזה שיר היא שייכת.</div></div>` : "");
     $("tokenInput").focus();
     $("tokenInput").select(); // a new paste replaces the key that did not work
   }
@@ -562,6 +630,11 @@ body.dragging .overlay{display:grid}
     $("connectPanel").hidden = true; $("app").hidden = false; $("logout").hidden = false;
     $("banners").innerHTML = "";
     renderAll();
+    loadShared().then(() => {
+      renderShared();
+      if (SHARED_ARRIVED === "error" || (SHARED_ARRIVED === "0" && !shared.length)) toast("לא הצלחתי לקבל את ההקלטה. נסו לשתף אותה שוב.", true);
+      if (shared.length) $("sharedPanel").scrollIntoView({ block: "start", behavior: "smooth" });
+    });
   }
   $("ownerName").textContent = CFG.owner;
   $("repo1").textContent = CFG.siteRepo;
@@ -584,6 +657,12 @@ body.dragging .overlay{display:grid}
 
   // ------------------------------------------------------------------ render
   function renderAll() { renderPending(); renderLibrary(); renderPrint(); }
+  // what arrived through the share menu: ?shared=N (N recordings) or ?shared=error; dropped from the address afterwards
+  const SHARED_ARRIVED = new URLSearchParams(location.search).get("shared");
+  if (SHARED_ARRIVED !== null) {
+    const u = new URL(location.href); u.searchParams.delete("shared");
+    history.replaceState(null, "", u.pathname + u.search + u.hash);
+  }
 
   function rowHtml(s, isPending) {
     const missing = !(s.year || "").trim();
@@ -638,6 +717,7 @@ body.dragging .overlay{display:grid}
   }
 
   function renderPending() {
+    renderSharedList();
     $("pendingBox").hidden = pending.length === 0;
     $("pendingRows").innerHTML = pending.map(p => rowHtml(p, true)).join("");
     const ready = pending.filter(p => p.state === "ready");
@@ -650,6 +730,7 @@ body.dragging .overlay{display:grid}
   }
 
   function renderLibrary() {
+    renderSharedList();
     const songs = [...lib.songs].sort((a, b) => a.number - b.number);
     $("rows").innerHTML = songs.map(s => rowHtml(s, false)).join("") || '<div class="empty-list">עוד אין שירים במשחק. הוסיפו שירים למעלה.</div>';
     const missing = songs.filter(s => !(s.year || "").trim()).length;
@@ -698,7 +779,8 @@ body.dragging .overlay{display:grid}
     }
   }
   window.addEventListener("beforeunload", e => {
-    if (Object.keys(edits).length || busy || rec || Object.values(oursJobs).some(j => j.state === "working")) { e.preventDefault(); e.returnValue = ""; }
+    if (Object.keys(edits).length || busy || rec || Object.values(oursJobs).some(j => j.state === "working")
+        || pending.some(p => p.ours && p.ours.state === "ready")) { e.preventDefault(); e.returnValue = ""; }
   });
 
   function findItem(id) {
@@ -818,7 +900,7 @@ body.dragging .overlay{display:grid}
   function stopPreview() {
     preview.pause(); const old = previewId; previewId = null;
     const btn = old && previewBtn(old);
-    if (btn) { btn.classList.remove("on"); btn.innerHTML = ICONS.play; btn.closest(".song").classList.remove("playing"); }
+    if (btn) { btn.classList.remove("on"); btn.innerHTML = ICONS.play; const row = btn.closest(".song"); if (row) row.classList.remove("playing"); }
   }
   function togglePreview(id, url) {
     if (previewId === id) return stopPreview();
@@ -826,11 +908,11 @@ body.dragging .overlay{display:grid}
     previewId = id; preview.src = url;
     preview.play().catch(() => {
       if (previewId !== id) return;
-      toast(/^o?n/.test(id) ? "הקובץ עוד לא זמין באתר (אחרי העלאה זה לוקח כדקה)" : "לא הצלחתי להשמיע את הקובץ", true);
+      toast(/^o?n/.test(id) ? "הקובץ עוד לא זמין באתר (אחרי העלאה זה לוקח כדקה)" : "הדפדפן לא מצליח להשמיע את הקובץ הזה", true);
       stopPreview();
     });
     const btn = previewBtn(id);
-    if (btn) { btn.classList.add("on"); btn.innerHTML = ICONS.pause; btn.closest(".song").classList.add("playing"); }
+    if (btn) { btn.classList.add("on"); btn.innerHTML = ICONS.pause; const row = btn.closest(".song"); if (row) row.classList.add("playing"); }
   }
   preview.addEventListener("ended", stopPreview);
 
@@ -1100,6 +1182,99 @@ body.dragging .overlay{display:grid}
     }
     addFiles(files);
   });
+
+  // ------------------------------------------------------------------ recordings shared from WhatsApp
+  // the service worker (sw.js) stores what the share menu sends; each one waits there until it is given to a song
+  const SHARE_CACHE = "shared-recordings";
+  let shared = [], sharedShown = null, sharedUrl = null;
+  async function loadShared() {
+    const found = [];
+    try {
+      const cache = await caches.open(SHARE_CACHE);
+      for (const key of await cache.keys()) {
+        const res = await cache.match(key); if (!res) continue;
+        found.push({ key, blob: await res.blob(), name: decodeURIComponent(res.headers.get("X-Name") || "") });
+      }
+    } catch (e) {}
+    shared = found.sort((a, b) => a.key.url.localeCompare(b.key.url, undefined, { numeric: true }));
+  }
+  async function forgetShared(item) {
+    shared = shared.filter(x => x !== item);
+    try { await (await caches.open(SHARE_CACHE)).delete(item.key); } catch (e) {}
+  }
+  // WhatsApp names voice notes "PTT-20261027-WA0003.opus"
+  function sharedName(name) {
+    const m = /PTT-(\d{4})(\d{2})(\d{2})/i.exec(name || "");
+    if (m) return `הקלטה מוואטסאפ (${+m[3]}.${+m[2]}.${m[1]})`;
+    if (!name || /-WA\d+|whatsapp/i.test(name)) return "הקלטה מוואטסאפ";
+    return name;
+  }
+  function renderShared() {
+    const item = shared[0];
+    $("sharedPanel").hidden = !item;
+    if (sharedShown !== item) { // a new recording on top: new preview
+      if (previewId === "shared") stopPreview();
+      if (sharedUrl) URL.revokeObjectURL(sharedUrl);
+      sharedUrl = item ? URL.createObjectURL(item.blob) : null;
+      sharedShown = item; $("sharedFilter").value = "";
+      if (item) {
+        $("sharedName").textContent = sharedName(item.name);
+        $("sharedDur").textContent = "";
+        mediaDuration(sharedUrl).then(d => { if (sharedShown === item) $("sharedDur").textContent = d > 0 ? fmtDur(d) : d < 0 ? "הדפדפן לא מצליח להשמיע אותה כאן, אבל אפשר לנסות לשייך" : ""; });
+      }
+    }
+    if (!item) return;
+    $("sharedPlay").innerHTML = previewId === "shared" ? ICONS.pause : ICONS.play;
+    $("sharedCount").textContent = shared.length > 1 ? `1 מתוך ${shared.length}` : "";
+    renderSharedList();
+  }
+  function renderSharedList() {
+    if (!shared.length || !lib) return;
+    const q = $("sharedFilter").value.trim().toLowerCase();
+    const opts = [
+      ...pending.filter(p => p.state !== "error").map(p => ({ id: "p" + p.id, num: 0, title: p.title || p.name, artist: p.artist, has: !!(p.ours && p.ours.state !== "error") })),
+      ...lib.songs.map(s => ({ id: "n" + s.number, num: s.number, title: s.title, artist: s.artist, has: !!s.ours || !!(oursJobs[s.number] && oursJobs[s.number].state === "working") })),
+    ].sort((a, b) => (a.has - b.has) || ((a.num || 1e9) - (b.num || 1e9)));
+    $("sharedFilter").hidden = opts.length < 8;
+    const shown = q ? opts.filter(o => (o.title + " " + o.artist).toLowerCase().includes(q)) : opts;
+    $("sharedList").innerHTML = shown.map(o => `<button class="pick" type="button" data-sid="${o.id}">
+        <div class="badge${o.num ? "" : " new"}">${o.num || "חדש"}</div>
+        <div class="pt"><b>${esc(o.title || "בלי שם")}</b><span>${esc(o.artist || "")}</span></div>
+        <span class="tag ${o.has ? "has" : "need"}">${o.has ? "יש ביצוע" : "חסר ביצוע"}</span></button>`).join("")
+      || `<div class="empty-list">${opts.length ? "לא נמצא שיר כזה." : "עוד אין שירים. הוסיפו קודם את השיר המקורי למטה, ואז בחרו אותו כאן."}</div>`;
+  }
+  $("sharedFilter").addEventListener("input", renderSharedList);
+  $("sharedPlay").addEventListener("click", () => { togglePreview("shared", sharedUrl); });
+  $("sharedSkip").addEventListener("click", async () => {
+    const item = shared[0]; if (!item) return;
+    if (!confirm("לוותר על ההקלטה הזו?")) return;
+    await forgetShared(item); renderShared();
+  });
+  $("sharedList").addEventListener("click", async e => {
+    const b = e.target.closest("button[data-sid]"); if (!b) return;
+    const item = shared[0]; if (!item) return;
+    const id = b.dataset.sid, { item: song } = findItem(id); if (!song) return;
+    if (b.querySelector(".tag.has") && !confirm(`ל"${song.title || "השיר הזה"}" כבר יש ביצוע. להחליף אותו בהקלטה הזו?`)) return;
+    await forgetShared(item);
+    renderShared();
+    addOurs(id, item.blob, sharedName(item.name));
+    const row = document.querySelector(`.song[data-id="${id}"]`);
+    if (row) row.scrollIntoView({ block: "center", behavior: "smooth" });
+    toast(shared.length ? "ההקלטה שויכה. עכשיו ההקלטה הבאה." : "ההקלטה שויכה לשיר");
+  });
+
+  // install as an app on the phone, so "ניהול שירים" shows up in WhatsApp's share menu
+  if ("serviceWorker" in navigator && window.isSecureContext) navigator.serviceWorker.register("sw.js").catch(() => {});
+  let installEvt = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("installBtn").hidden = false; $("installManual").hidden = true; });
+  window.addEventListener("appinstalled", () => { installEvt = null; $("installBtn").hidden = true; $("installManual").hidden = true; toast("הותקן! עכשיו אפשר לשתף אליו הקלטות מוואטסאפ"); });
+  $("installBtn").addEventListener("click", async () => {
+    if (!installEvt) return;
+    installEvt.prompt();
+    try { await installEvt.userChoice; } catch (e) {}
+    installEvt = null; $("installBtn").hidden = true; $("installManual").hidden = false;
+  });
+  if (matchMedia("(display-mode: standalone)").matches) $("waHelp").querySelector("li").innerHTML = "האפליקציה כבר מותקנת במכשיר הזה ✓";
 
   // ------------------------------------------------------------------ upload
   $("uploadBtn").addEventListener("click", async () => {

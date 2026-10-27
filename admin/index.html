@@ -1167,20 +1167,38 @@ body.dragging .overlay{display:grid}
     if (!/^\d{4}$/.test(y || "")) return "#8A8178";
     return DECADES[Math.max(1940, Math.min(2020, Math.floor(+y / 10) * 10))];
   }
-  function qrSvg(text) {
-    const q = qrcode(0, "M"); q.addData(text); q.make();
+  // level L keeps the back code small enough (29x29) to fit under the song details
+  function qrSvg(text, level) {
+    const q = qrcode(0, level || "M"); q.addData(text); q.make();
     return q.createSvgTag({ cellSize: 4, margin: 0, scalable: true });
   }
+  const MIC = '<svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V5a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11z"/></svg>';
+  const NOTE = '<svg viewBox="0 0 24 24"><path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3z"/></svg>';
+  // front: the code for the original song. back: year, artist, title, and the code for our performance
   function cardsHtml(songs) {
     const per = 12, cols = 3, pages = [];
+    const front = s => `<div class="card front">
+      <div class="brand">קלפי שירים</div>
+      <div class="qr">${qrSvg(CFG.siteUrl + "#" + s.number)}</div>
+      <div class="cap">${NOTE}השיר המקורי</div>
+      <div class="num">${s.number}</div></div>`;
+    const back = s => `<div class="card back${s.ours ? "" : " solo"}" style="--c:${decadeColor(s.year)}">
+      <div class="info">
+        <div class="artist fit">${esc(s.artist)}</div>
+        <div class="year">${esc(s.year || "????")}</div>
+        <div class="title fit">${esc(s.title)}</div>
+      </div>
+      ${s.ours ? `<div class="ours">
+        <div class="otext">${MIC}<b>הביצוע שלנו</b><span>סרקו כדי לשמוע</span><i>קלף ${s.number}</i></div>
+        <div class="tile">${qrSvg(CFG.siteUrl + "#" + s.number + "-b", "L")}</div>
+      </div>` : `<div class="bnum">קלף ${s.number}</div>`}</div>`;
     for (let i = 0; i < songs.length; i += per) {
       const chunk = songs.slice(i, i + per);
       while (chunk.length < per) chunk.push(null);
-      const fronts = chunk.map(s => s ? `<div class="card front"><div class="brand">♪ קלפי שירים</div><div class="qr">${qrSvg(CFG.siteUrl + "#" + s.number)}</div><div class="num">${s.number}</div></div>` : '<div class="card empty"></div>');
+      const fronts = chunk.map(s => s ? front(s) : '<div class="card empty"></div>');
       const backs = [];
-      for (let r = 0; r < 4; r++) for (const s of chunk.slice(r * cols, r * cols + cols).reverse()) { // mirrored for long-edge duplex
-        backs.push(s ? `<div class="card back" style="--c:${decadeColor(s.year)}"><div class="artist fit">${esc(s.artist)}</div><div class="year">${esc(s.year || "????")}</div><div class="title fit">${esc(s.title)}</div><div class="bnum">${s.number}</div></div>` : '<div class="card empty"></div>');
-      }
+      for (let r = 0; r < 4; r++) for (const s of chunk.slice(r * cols, r * cols + cols).reverse()) // mirrored for long-edge duplex
+        backs.push(s ? back(s) : '<div class="card empty"></div>');
       pages.push(`<section class="sheet">${fronts.join("")}</section><section class="sheet">${backs.join("")}</section>`);
     }
     return `<!doctype html><html lang="he" dir="rtl"><head><meta charset="utf-8"><title>קלפי שירים · להדפסה</title><style>
@@ -1193,27 +1211,48 @@ body{font-family:"Segoe UI","Arial Hebrew",Arial,sans-serif;color:#1F1A15;backgr
 .sheet:last-of-type{break-after:auto;page-break-after:auto}
 @media screen{.sheet{margin:0 auto 8mm;box-shadow:0 6px 24px rgba(60,40,20,.18)}}
 .card{width:60mm;height:60mm;position:relative;overflow:hidden;outline:.2mm dashed #CFC5B8;outline-offset:-.1mm}.card.empty{outline:none}
-.front{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.2mm}
-.front .brand{font-size:7.5pt;font-weight:700;letter-spacing:.3pt;color:#6F655A}.front .qr{width:38mm;height:38mm}.front .qr svg{width:100%;height:100%;display:block}
-.front .num{position:absolute;bottom:3mm;left:4mm;font-size:7.5pt;font-weight:700;color:#9A8F82;direction:ltr}
-.back{background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:6mm 5mm 5.5mm}
-.back::before{content:"";position:absolute;inset:3mm;border:.35mm solid rgba(255,255,255,.35);border-radius:3mm}
-.back .artist{height:14mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:12pt;font-weight:700;line-height:1.15;overflow:hidden}
-.back .year{font-size:34pt;font-weight:900;line-height:1}
-.back .title{height:16mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:500;line-height:1.2;overflow:hidden}
-.back .bnum{position:absolute;bottom:4.6mm;right:6mm;font-size:6.5pt;font-weight:700;opacity:.6;direction:ltr}
+svg{display:block}
+/* front */
+.front{background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2.4mm;padding-top:.6mm}
+.front .brand{font-size:7pt;font-weight:700;letter-spacing:.6pt;color:#8A7F72}
+.front .qr{width:35mm;height:35mm}.front .qr svg{width:100%;height:100%}
+.front .cap{display:flex;align-items:center;gap:1mm;font-size:8pt;font-weight:700;color:#1F1A15}
+.front .cap svg{width:3.2mm;height:3.2mm;fill:#E0563B}
+.front .num{position:absolute;bottom:3mm;left:4mm;font-size:7pt;font-weight:700;color:#A2978A;direction:ltr}
+/* back */
+.back{background:var(--c);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;padding:4.2mm 4.8mm 3.9mm}
+.back::before{content:"";position:absolute;inset:2.6mm;border:.3mm solid rgba(255,255,255,.38);border-radius:3mm;pointer-events:none}
+.back .info{width:100%;display:flex;flex-direction:column;align-items:center;gap:.3mm}
+.back .artist{height:8.2mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:10pt;font-weight:700;line-height:1.12;overflow:hidden}
+.back .year{font-size:24pt;font-weight:900;line-height:.98;letter-spacing:-.2pt;font-variant-numeric:tabular-nums}
+.back .title{height:7.6mm;width:100%;display:flex;align-items:center;justify-content:center;font-size:9pt;font-weight:500;line-height:1.15;overflow:hidden}
+.back .ours{display:flex;align-items:center;justify-content:center;gap:2.6mm}
+.back .tile{width:23.4mm;height:23.4mm;padding:1.6mm;background:#fff;border-radius:2mm;flex:none}
+.back .tile svg{width:100%;height:100%}
+.back .otext{display:flex;flex-direction:column;align-items:flex-start;text-align:right;line-height:1.2}
+.back .otext svg{width:4.2mm;height:4.2mm;fill:#fff;margin-bottom:.6mm}
+.back .otext b{font-size:8.5pt;font-weight:800}
+.back .otext span{font-size:6.5pt;opacity:.88}
+.back .otext i{font-style:normal;font-size:6pt;font-weight:700;opacity:.6;margin-top:1.2mm}
+.back.solo{justify-content:center;gap:3mm}
+.back.solo .artist{height:13mm;font-size:12pt}.back.solo .year{font-size:34pt}.back.solo .title{height:14mm;font-size:11pt}
+.back .bnum{position:absolute;bottom:4.4mm;left:0;right:0;font-size:6pt;font-weight:700;opacity:.6}
 </style></head><body>
-<div class="howto"><h1>איך מדפיסים</h1>הדפסה <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. כל דף שני הוא הגב של הדף שלפניו. גוזרים לאורך הקווים המקווקווים.<br><button onclick="print()">הדפסה</button></div>
+<div class="howto"><h1>איך מדפיסים</h1>הדפסה <b>דו־צדדית</b>, היפוך לאורך הצד הארוך (Flip on long edge), בגודל <b>100%</b>. כל דף שני הוא הגב של הדף שלפניו. גוזרים לאורך הקווים המקווקווים.<br>
+מקדימה: הקוד של <b>השיר המקורי</b>. מאחורה: השנה, הזמר, שם השיר והקוד של <b>הביצוע שלנו</b>.<br><button onclick="print()">הדפסה</button></div>
 ${pages.join("\n")}
 <script>for(const el of document.querySelectorAll(".fit")){let s=parseFloat(getComputedStyle(el).fontSize);while((el.scrollHeight>el.clientHeight+1||el.scrollWidth>el.clientWidth+1)&&s>6){s-=.5;el.style.fontSize=s+"px"}}setTimeout(()=>print(),400)<\/script>
 </body></html>`;
   }
+  if (["localhost", "127.0.0.1"].includes(location.hostname)) window.__cardsHtml = cardsHtml; // for the print tests
   async function printCards(onlyNew) {
     await flushEdits();
     const songs = [...lib.songs].filter(s => !onlyNew || s.number > lib.printed_upto).sort((a, b) => a.number - b.number);
     if (!songs.length) return;
     const missing = songs.filter(s => !(s.year || "").trim()).length;
     if (missing && !confirm(`ל־${missing} קלפים אין שנה, ובגב שלהם יהיה כתוב "????". להדפיס בכל זאת?`)) return;
+    const noOurs = songs.filter(s => !s.ours).length;
+    if (noOurs && !confirm(`ל־${noOurs} קלפים אין עדיין את הביצוע שלנו, ובגב שלהם לא יהיה קוד. להדפיס בכל זאת?`)) return;
     const w = window.open("", "_blank");
     if (!w) return toast("הדפדפן חסם את חלון ההדפסה. אשרו חלונות קופצים לאתר הזה ונסו שוב.", true);
     w.document.open(); w.document.write(cardsHtml(songs)); w.document.close();

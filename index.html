@@ -209,9 +209,9 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     <summary>איך משחקים?</summary>
     <ol>
       <li>כל שחקן מקבל קלף אחד הפוך עם השנה למעלה: זו תחילת ציר הזמן שלו.</li>
-      <li>בתור שלכם, לוחצים על <b>סריקת קלף</b>, מכוונים את המצלמה לקלף חדש ומקשיבים לשיר בלי להציץ בגב. אחרי השיר המקורי מתנגן גם <b>הביצוע שלנו</b>.</li>
+      <li>בתור שלכם, לוחצים על <b>סריקת קלף</b>, מכוונים את המצלמה לקלף חדש ומקשיבים לשיר בלי להציץ בגב.</li>
       <li>מניחים את הקלף בציר הזמן איפה שחושבים שהשיר נמצא: לפני, אחרי או בין הקלפים שכבר יש לכם.</li>
-      <li>הופכים את הקלף. צדקתם? הקלף נשאר אצלכם. טעיתם? הוא יוצא מהמשחק.</li>
+      <li>הופכים את הקלף. צדקתם? הקלף נשאר אצלכם. טעיתם? הוא יוצא מהמשחק. בגב הקלף יש קוד נוסף: סורקים אותו ושומעים את <b>הביצוע שלנו</b> לשיר.</li>
       <li>בונוס: מי שמנחש גם את הזמר ואת שם השיר מקבל אסימון.</li>
       <li>הראשון שמגיע ל־10 קלפים בציר הזמן מנצח.</li>
     </ol>
@@ -246,7 +246,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   const canScan = window.isSecureContext && !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
   let number = null, started = false, silent = false, unlocked = false;
   // every card has the original song (N.mp3) and our own performance of it (N-b.mp3), played in that order
-  let part = "orig", hasOurs = false, nextTimer = 0;
+  let part = "orig", hasOurs = false;
   const src = () => "songs/" + number + (part === "ours" ? "-b" : "") + ".mp3";
   const PART_TEXT = {
     orig: ["מי שר? ובאיזו שנה?", "מקמו את הקלף בציר הזמן, ורק אז הפכו אותו"],
@@ -254,6 +254,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   };
   function renderParts() {
     $("parts").hidden = !number || !hasOurs;
+    if (number) $("chip").textContent = "קלף " + number + (part === "ours" ? " · הביצוע שלנו" : "");
     for (const b of $("parts").querySelectorAll("button")) b.setAttribute("aria-pressed", String(b.dataset.part === part));
   }
   async function checkOurs(n) {
@@ -263,7 +264,6 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     hasOurs = ok; renderParts();
   }
   function playPart(p) {
-    clearTimeout(nextTimer);
     if (!number) return;
     part = p; started = false;
     record.disabled = false; $("retry").hidden = true;
@@ -277,9 +277,11 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     }
   }
 
-  function readNumber() {
+  // a card code: "#5" = the original song (front of the card), "#5-b" = our performance (back of the card)
+  function readCard() {
     const raw = (location.hash.slice(1) || new URLSearchParams(location.search).get("c") || "").trim();
-    return /^\d{1,6}$/.test(raw) ? String(parseInt(raw, 10)) : null;
+    const m = /^(\d{1,6})(-b)?$/i.exec(raw);
+    return m ? { n: String(parseInt(m[1], 10)), part: m[2] ? "ours" : "orig" } : null;
   }
   function fmt(t) {
     if (!isFinite(t) || t < 0) t = 0;
@@ -296,7 +298,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   }
 
   function welcome() {
-    number = null; part = "orig"; hasOurs = false; clearTimeout(nextTimer);
+    number = null; part = "orig"; hasOurs = false;
     renderParts();
     audio.removeAttribute("src"); audio.load();
     body.classList.remove("playing", "loading");
@@ -311,12 +313,12 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
       : "פתחו את מצלמת הטלפון וכוונו אותה לקוד שעל הקלף. השיר יתנגן כאן, בלי לגלות את שמו.");
   }
 
-  function load(n) {
+  function load(n, startPart) {
     number = n; started = false; silent = false;
-    part = "orig"; hasOurs = false; clearTimeout(nextTimer);
+    part = startPart || "orig"; hasOurs = part === "ours";
     renderParts(); checkOurs(n);
     document.title = "קלף " + n + " · קלפי שירים";
-    $("chip").textContent = "קלף " + n;
+    $("chip").textContent = "קלף " + n + (part === "ours" ? " · הביצוע שלנו" : "");
     $("rules").hidden = true; $("retry").hidden = true;
     $("controls").hidden = true; $("time").textContent = "";
     record.disabled = false;
@@ -336,7 +338,6 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
 
   function toggle() {
     if (!number) { if (canScan) openScanner(); return; }
-    clearTimeout(nextTimer); // a tap while "our performance is next" replays this part instead
     if (audio.paused) {
       body.classList.add("loading");
       const p = audio.play();
@@ -394,12 +395,8 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   audio.addEventListener("ended", () => {
     if (silent) return;
     setRing(1);
-    if (part === "orig" && hasOurs) { // the original is over: our performance comes next
-      setText("ועכשיו: הביצוע שלנו", "מתחיל עוד רגע...");
-      nextTimer = setTimeout(() => playPart("ours"), 1200);
-      return;
-    }
-    setText(part === "ours" ? "הביצוע נגמר" : "השיר נגמר", "סרקו את הקלף הבא, או הקישו על התקליט כדי לשמוע שוב");
+    if (part === "orig" && hasOurs) setText("השיר נגמר", "הפכו את הקלף וסרקו את הקוד שמאחורה כדי לשמוע את הביצוע שלנו");
+    else setText(part === "ours" ? "הביצוע נגמר" : "השיר נגמר", "סרקו את הקלף הבא, או הקישו על התקליט כדי לשמוע שוב");
   });
   audio.addEventListener("timeupdate", () => {
     if (!started || silent) return;
@@ -412,7 +409,7 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     if (e.key === "Escape" && !$("scanner").hidden) { closeScanner(); return; }
     if (e.code === "Space" && number && e.target === document.body) { e.preventDefault(); toggle(); }
   });
-  window.addEventListener("hashchange", () => { const n = readNumber(); n ? load(n) : welcome(); });
+  window.addEventListener("hashchange", () => { const c = readCard(); c ? load(c.n, c.part) : welcome(); });
 
   // ---------------------------------------------------------------- scanner
   const cam = $("cam"), scanner = $("scanner");
@@ -458,7 +455,6 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
 
   async function openScanner() {
     if (!canScan || scanning || !scanner.hidden) return;
-    clearTimeout(nextTimer);
     unlockAudio();
     scanner.hidden = false; scanner.classList.remove("found"); $("scanProblem").hidden = true;
     history.pushState({ scanner: true }, "", location.href); // the phone's Back button closes the camera
@@ -518,8 +514,8 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     if (!scanning) return;
     if (text) {
       const t = String(text).trim();
-      const m = t.match(/#(\d{1,6})\s*$/) || t.match(/^(\d{1,6})$/);
-      if (m) return found(String(parseInt(m[1], 10)));
+      const m = t.match(/#(\d{1,6})(-b)?\s*$/i) || t.match(/^(\d{1,6})(-b)?$/i);
+      if (m) return found(String(parseInt(m[1], 10)), m[2] ? "ours" : "orig");
       if (Date.now() > badUntil) { setMsg("זה לא קלף של המשחק. נסו קלף אחר", true); badUntil = Date.now() + 1800; }
     } else if (badUntil && Date.now() > badUntil) {
       badUntil = 0; setMsg("כוונו את המצלמה אל הקוד שעל הקלף");
@@ -527,15 +523,15 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
     timer = setTimeout(tick, detector ? 120 : 90);
   }
 
-  function found(n) {
+  function found(n, startPart) {
     scanning = false;
     scanner.classList.add("found");
     if (navigator.vibrate) navigator.vibrate(40);
     setMsg("נמצא! מנגן...");
     stopCamera();
     setTimeout(() => closeScanner(() => {   // a short green flash so it is clear the card was read
-      history.replaceState(null, "", "#" + n);
-      load(n);
+      history.replaceState(null, "", "#" + n + (startPart === "ours" ? "-b" : ""));
+      load(n, startPart);
     }), 220);
   }
 
@@ -572,8 +568,8 @@ footer{font-size:12.5px;color:var(--muted);text-align:center}
   $("scanProblemClose").addEventListener("click", () => closeScanner());
 
   // ---------------------------------------------------------------- start
-  const n = readNumber();
-  n ? load(n) : welcome();
+  const card = readCard();
+  card ? load(card.n, card.part) : welcome();
 })();
 </script>
 </body>
